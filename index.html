@@ -2,704 +2,103 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة الإدارة - وضعيات التصوير الشعاعي</title>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-            font-family: 'Cairo', sans-serif;
-        }
-        
-        body { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container { 
-            max-width: 900px; 
-            margin: 0 auto;
-        }
-        
-        /* الهيدر */
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 30px 20px;
-            background: rgba(255,255,255,0.95);
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(102, 126, 234, 0.1), transparent);
-            animation: shine 4s ease-in-out infinite;
-        }
-        
-        @keyframes shine {
-            0% { transform: translate(-30%, -30%); }
-            100% { transform: translate(30%, 30%); }
-        }
-        
-        .header h1 { 
-            color: #2c3e50; 
-            font-weight: 800; 
-            font-size: 2rem; 
-            position: relative; 
-            z-index: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-        
-        .header h1 i {
-            color: #667eea;
-        }
-        
-        .header .subtitle { 
-            color: #7f8c8d; 
-            font-size: 1rem; 
-            margin-top: 8px; 
-            position: relative; 
-            z-index: 1; 
-        }
-        
-        /* بطاقة الإضافة */
-        .card {
-            background: rgba(255,255,255,0.95);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
-        }
-        
-        .card-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #2c3e50;
-            font-weight: 700;
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f1f2f6;
-        }
-        
-        .card-title i {
-            color: #667eea;
-            font-size: 1.4rem;
-        }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .form-group { 
-            margin-bottom: 15px; 
-        }
-        
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
-        
-        label { 
-            display: block; 
-            font-weight: 600; 
-            margin-bottom: 6px; 
-            color: #2c3e50; 
-            font-size: 0.9rem; 
-        }
-        
-        label .required {
-            color: #e74c3c;
-        }
-        
-        input, select, textarea { 
-            width: 100%; 
-            padding: 12px 15px; 
-            border: 2px solid #e9ecef; 
-            border-radius: 12px; 
-            font-size: 0.95rem; 
-            background: #f8f9fa; 
-            transition: all 0.3s ease; 
-            font-family: 'Cairo', sans-serif;
-        }
-        
-        input:focus, select:focus, textarea:focus { 
-            border-color: #667eea; 
-            outline: none; 
-            background: white; 
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1); 
-        }
-        
-        textarea { 
-            min-height: 80px; 
-            resize: vertical; 
-        }
-        
-        .btn-group {
-            display: flex;
-            gap: 12px;
-            margin-top: 10px;
-            grid-column: 1 / -1;
-        }
-        
-        .btn { 
-            padding: 14px 28px; 
-            border: none; 
-            border-radius: 12px; 
-            font-size: 1rem; 
-            font-weight: 700; 
-            cursor: pointer; 
-            transition: all 0.3s ease; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            flex: 1;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn-primary:active {
-            transform: scale(0.98);
-        }
-        
-        .btn-secondary {
-            background: #e9ecef;
-            color: #2c3e50;
-        }
-        
-        .btn-secondary:hover {
-            background: #dde1e6;
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
-        }
-        
-        .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
-        }
-        
-        .btn-success {
-            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
-        }
-        
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4);
-        }
-        
-        .btn-sm {
-            padding: 8px 16px;
-            font-size: 0.85rem;
-            flex: 0 1 auto;
-        }
-        
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        /* ====== حقل رفع الصور ====== */
-        .upload-group {
-            grid-column: 1 / -1;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .upload-box {
-            background: #f8f9fa;
-            border: 2px dashed #bdc3c7;
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-            min-height: 160px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .upload-box.dragover {
-            border-color: #667eea;
-            background: #eef1ff;
-            transform: scale(1.01);
-        }
-        
-        .upload-box.has-image {
-            border-color: #2ecc71;
-            border-style: solid;
-            background: #f0fff4;
-        }
-        
-        .upload-box i {
-            font-size: 2.5rem;
-            color: #bdc3c7;
-            margin-bottom: 8px;
-        }
-        
-        .upload-box .label-text {
-            font-weight: 600;
-            color: #7f8c8d;
-        }
-        
-        .upload-box .sub-text {
-            font-size: 0.8rem;
-            color: #bdc3c7;
-        }
-        
-        .upload-box .preview-img {
-            max-width: 100%;
-            max-height: 120px;
-            object-fit: contain;
-            border-radius: 10px;
-            margin-top: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .upload-box input[type="file"] {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-        
-        .upload-box .file-name {
-            font-size: 0.8rem;
-            color: #2c3e50;
-            margin-top: 6px;
-            font-weight: 600;
-        }
-        
-        .upload-box .remove-image {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-            z-index: 10;
-        }
-        
-        .upload-box .remove-image:hover {
-            transform: scale(1.1);
-            background: #c0392b;
-        }
-        
-        /* ====== أدوات البحث والفرز ====== */
-        .filter-tools {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f1f2f6;
-        }
-        
-        .filter-tools .search-box {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-        
-        .filter-tools .search-box i {
-            position: absolute;
-            right: 15px;
-            color: #bdc3c7;
-            font-size: 1.1rem;
-        }
-        
-        .filter-tools .search-box input {
-            padding-right: 45px;
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            width: 100%;
-            padding: 10px 15px 10px 45px;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-        }
-        
-        .filter-tools .search-box input:focus {
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-        }
-        
-        .filter-tools .filter-select {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-        
-        .filter-tools .filter-select i {
-            position: absolute;
-            right: 15px;
-            color: #bdc3c7;
-            font-size: 1.1rem;
-            pointer-events: none;
-        }
-        
-        .filter-tools .filter-select select {
-            padding-right: 45px;
-            appearance: none;
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            width: 100%;
-            padding: 10px 15px 10px 45px;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .filter-tools .filter-select select:focus {
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-        }
-        
-        .filter-stats {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: #7f8c8d;
-        }
-        
-        .filter-stats .stats-badge {
-            background: #e9ecef;
-            padding: 4px 14px;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-        
-        /* قائمة الوضعيات */
-        .positions-list {
-            margin-top: 10px;
-        }
-        
-        .position-item-admin {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 15px 20px;
-            background: #f8f9fa;
-            border-radius: 14px;
-            margin-bottom: 12px;
-            transition: all 0.3s ease;
-            border-right: 4px solid #667eea;
-        }
-        
-        .position-item-admin:hover {
-            background: #f1f3f5;
-            transform: translateX(-5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-        
-        .position-item-admin .pos-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex: 1;
-        }
-        
-        .position-item-admin .pos-info .pos-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.9rem;
-            flex-shrink: 0;
-        }
-        
-        .position-item-admin .pos-info .pos-details {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .position-item-admin .pos-info .pos-details .pos-name {
-            font-weight: 700;
-            color: #2c3e50;
-            font-size: 1rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .position-item-admin .pos-info .pos-details .pos-region {
-            font-size: 0.85rem;
-            color: #7f8c8d;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-top: 2px;
-        }
-        
-        .position-item-admin .pos-actions {
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-        
-        .position-item-admin .pos-actions .btn {
-            padding: 6px 12px;
-            font-size: 0.8rem;
-        }
-        
-        /* حالة الرسائل */
-        .status-message {
-            padding: 15px 20px;
-            border-radius: 12px;
-            margin-top: 15px;
-            display: none;
-            align-items: center;
-            gap: 10px;
-            font-weight: 600;
-        }
-        
-        .status-message.show {
-            display: flex;
-        }
-        
-        .status-message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .status-message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .status-message.info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-        
-        /* مؤشر التحميل */
-        .loading-spinner {
-            display: none;
-            text-align: center;
-            padding: 30px;
-            color: #7f8c8d;
-        }
-        
-        .loading-spinner.show {
-            display: block;
-        }
-        
-        .loading-spinner i {
-            font-size: 2rem;
-            animation: spin 1s linear infinite;
-            display: block;
-            margin-bottom: 10px;
-        }
-        
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        /* فارغ */
-        .empty-state-admin {
-            text-align: center;
-            padding: 40px 20px;
-            color: #7f8c8d;
-        }
-        
-        .empty-state-admin i {
-            font-size: 3rem;
-            color: #bdc3c7;
-            margin-bottom: 15px;
-            display: block;
-        }
-        
-        /* رابط العودة */
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 20px;
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            padding: 12px 24px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(5px);
-        }
-        
-        .back-link:hover {
-            background: rgba(255,255,255,0.25);
-            transform: translateY(-2px);
-        }
-        
-        /* متجاوب */
+        /* نفس الأنماط التي كانت لديك مع تحسينات بسيطة */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; padding: 30px 20px; background: rgba(255,255,255,0.95); border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+        .header h1 { color: #2c3e50; font-weight: 800; font-size: 2rem; display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .header h1 i { color: #667eea; }
+        .header .subtitle { color: #7f8c8d; font-size: 1rem; margin-top: 8px; }
+        .card { background: rgba(255,255,255,0.95); border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+        .card-title { display: flex; align-items: center; gap: 10px; color: #2c3e50; font-weight: 700; font-size: 1.2rem; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f1f2f6; }
+        .card-title i { color: #667eea; font-size: 1.4rem; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        label { display: block; font-weight: 600; margin-bottom: 6px; color: #2c3e50; font-size: 0.9rem; }
+        label .required { color: #e74c3c; }
+        input, select, textarea { width: 100%; padding: 12px 15px; border: 2px solid #e9ecef; border-radius: 12px; font-size: 0.95rem; background: #f8f9fa; transition: all 0.3s ease; font-family: 'Cairo', sans-serif; }
+        input:focus, select:focus, textarea:focus { border-color: #667eea; outline: none; background: white; box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1); }
+        textarea { min-height: 80px; resize: vertical; }
+        .btn-group { display: flex; gap: 12px; margin-top: 10px; grid-column: 1 / -1; }
+        .btn { padding: 14px 28px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; flex: 1; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); }
+        .btn-secondary { background: #e9ecef; color: #2c3e50; }
+        .btn-secondary:hover { background: #dde1e6; }
+        .btn-danger { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3); }
+        .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4); }
+        .btn-success { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3); }
+        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+        .upload-group { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .upload-box { background: #f8f9fa; border: 2px dashed #bdc3c7; border-radius: 16px; padding: 20px; text-align: center; transition: all 0.3s ease; cursor: pointer; position: relative; min-height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .upload-box.dragover { border-color: #667eea; background: #eef1ff; transform: scale(1.01); }
+        .upload-box.has-image { border-color: #2ecc71; border-style: solid; background: #f0fff4; }
+        .upload-box i { font-size: 2.5rem; color: #bdc3c7; margin-bottom: 8px; }
+        .upload-box .label-text { font-weight: 600; color: #7f8c8d; }
+        .upload-box .sub-text { font-size: 0.8rem; color: #bdc3c7; }
+        .upload-box .preview-img { max-width: 100%; max-height: 120px; object-fit: contain; border-radius: 10px; margin-top: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .upload-box input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+        .upload-box .file-name { font-size: 0.8rem; color: #2c3e50; margin-top: 6px; font-weight: 600; }
+        .upload-box .remove-image { position: absolute; top: 8px; right: 8px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; transition: all 0.2s ease; z-index: 10; }
+        .upload-box .remove-image:hover { transform: scale(1.1); background: #c0392b; }
+        .status-message { padding: 15px 20px; border-radius: 12px; margin-top: 15px; display: none; align-items: center; gap: 10px; font-weight: 600; }
+        .status-message.show { display: flex; }
+        .status-message.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status-message.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status-message.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .loading-spinner { display: none; text-align: center; padding: 30px; color: #7f8c8d; }
+        .loading-spinner.show { display: block; }
+        .loading-spinner i { font-size: 2rem; animation: spin 1s linear infinite; display: block; margin-bottom: 10px; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .position-item-admin { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; background: #f8f9fa; border-radius: 14px; margin-bottom: 12px; transition: all 0.3s ease; border-right: 4px solid #667eea; }
+        .position-item-admin:hover { background: #f1f3f5; transform: translateX(-5px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .position-item-admin .pos-info { display: flex; align-items: center; gap: 15px; flex: 1; }
+        .position-item-admin .pos-info .pos-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+        .position-item-admin .pos-info .pos-details { flex: 1; min-width: 0; }
+        .position-item-admin .pos-info .pos-details .pos-name { font-weight: 700; color: #2c3e50; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .position-item-admin .pos-info .pos-details .pos-region { font-size: 0.85rem; color: #7f8c8d; display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+        .position-item-admin .pos-actions { display: flex; gap: 8px; flex-shrink: 0; }
+        .position-item-admin .pos-actions .btn { padding: 6px 12px; font-size: 0.8rem; }
+        .filter-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f1f2f6; }
+        .filter-tools .search-box { position: relative; display: flex; align-items: center; }
+        .filter-tools .search-box i { position: absolute; right: 15px; color: #bdc3c7; font-size: 1.1rem; }
+        .filter-tools .search-box input { padding-right: 45px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; width: 100%; padding: 10px 15px 10px 45px; font-size: 0.95rem; transition: all 0.3s ease; }
+        .filter-tools .search-box input:focus { border-color: #667eea; background: white; box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1); }
+        .filter-tools .filter-select { position: relative; display: flex; align-items: center; }
+        .filter-tools .filter-select i { position: absolute; right: 15px; color: #bdc3c7; font-size: 1.1rem; pointer-events: none; }
+        .filter-tools .filter-select select { padding-right: 45px; appearance: none; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; width: 100%; padding: 10px 15px 10px 45px; font-size: 0.95rem; cursor: pointer; transition: all 0.3s ease; }
+        .filter-tools .filter-select select:focus { border-color: #667eea; background: white; box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1); }
+        .filter-stats { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 0.9rem; color: #7f8c8d; }
+        .filter-stats .stats-badge { background: #e9ecef; padding: 4px 14px; border-radius: 20px; font-weight: 600; }
+        .filter-clear { color: #e74c3c; cursor: pointer; font-size: 0.85rem; padding: 4px 12px; border-radius: 8px; transition: all 0.3s ease; background: #f8f9fa; border: none; font-weight: 600; }
+        .filter-clear:hover { background: #fee; color: #c0392b; }
+        .filter-clear:disabled { opacity: 0.5; cursor: not-allowed; }
+        .empty-state-admin { text-align: center; padding: 40px 20px; color: #7f8c8d; }
+        .empty-state-admin i { font-size: 3rem; color: #bdc3c7; margin-bottom: 15px; display: block; }
+        .back-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; color: white; text-decoration: none; font-weight: 600; padding: 12px 24px; background: rgba(255,255,255,0.15); border-radius: 12px; transition: all 0.3s ease; backdrop-filter: blur(5px); }
+        .back-link:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: white; border-radius: 24px; padding: 30px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: modalIn 0.3s ease-out; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .modal h3 { color: #2c3e50; margin-bottom: 10px; }
+        .modal p { color: #7f8c8d; margin-bottom: 20px; }
+        .modal .btn-group { display: flex; gap: 12px; justify-content: center; }
+        .modal .btn-group .btn { flex: 1; max-width: 150px; }
         @media (max-width: 768px) {
-            .form-grid { grid-template-columns: 1fr; }
-            .upload-group { grid-template-columns: 1fr; }
-            .filter-tools { grid-template-columns: 1fr; }
-            .position-item-admin {
-                flex-direction: column;
-                gap: 12px;
-                align-items: stretch;
-            }
-            .position-item-admin .pos-info {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-            }
-            .position-item-admin .pos-actions { justify-content: flex-end; }
+            .form-grid, .upload-group, .filter-tools { grid-template-columns: 1fr; }
             .btn-group { flex-direction: column; }
-            .btn { flex: 1; }
-            .header h1 { font-size: 1.4rem; }
-            .card { padding: 18px; }
-        }
-        
-        @media (max-width: 480px) {
-            body { padding: 12px; }
-            .header { padding: 20px 15px; }
-            .position-item-admin { padding: 12px 16px; }
-            .position-item-admin .pos-actions .btn {
-                padding: 4px 10px;
-                font-size: 0.75rem;
-            }
-        }
-        
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(5px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-overlay.show {
-            display: flex;
-        }
-        
-        .modal {
-            background: white;
-            border-radius: 24px;
-            padding: 30px;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            animation: modalIn 0.3s ease-out;
-        }
-        
-        @keyframes modalIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        
-        .modal h3 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        
-        .modal p {
-            color: #7f8c8d;
-            margin-bottom: 20px;
-        }
-        
-        .modal .btn-group {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-        }
-        
-        .modal .btn-group .btn {
-            flex: 1;
-            max-width: 150px;
-        }
-        
-        .filter-clear {
-            color: #e74c3c;
-            cursor: pointer;
-            font-size: 0.85rem;
-            padding: 4px 12px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
-            border: none;
-            font-weight: 600;
-        }
-        
-        .filter-clear:hover {
-            background: #fee;
-            color: #c0392b;
-        }
-        
-        .filter-clear:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+            .position-item-admin { flex-direction: column; gap: 12px; align-items: stretch; }
+            .position-item-admin .pos-info { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .position-item-admin .pos-actions { justify-content: flex-end; }
         }
     </style>
 </head>
@@ -707,10 +106,7 @@
 
 <div class="container">
     <div class="header">
-        <h1>
-            <i class="fas fa-cog"></i>
-            لوحة الإدارة
-        </h1>
+        <h1><i class="fas fa-cog"></i> لوحة الإدارة</h1>
         <p class="subtitle">إدارة وضعيات التصوير الشعاعي - إضافة، تعديل، حذف</p>
     </div>
 
@@ -719,16 +115,13 @@
             <i class="fas fa-plus-circle"></i>
             <span id="formTitle">إضافة وضعية جديدة</span>
         </div>
-        
         <form id="uploadForm">
             <input type="hidden" id="editId" value="">
-            
             <div class="form-grid">
                 <div class="form-group">
                     <label>اسم الوضعية <span class="required">*</span></label>
                     <input type="text" id="posName" placeholder="مثال: AP Skull" required>
                 </div>
-
                 <div class="form-group">
                     <label>المنطقة <span class="required">*</span></label>
                     <select id="regionSelect" required>
@@ -765,11 +158,8 @@
                         <img class="preview-img" id="realPreview" style="display:none;">
                         <div class="file-name" id="realFileName"></div>
                         <input type="file" id="realFileInput" accept="image/*" required>
-                        <button class="remove-image" id="removeRealImage" style="display:none;">
-                            <i class="fas fa-times"></i>
-                        </button>
+                        <button class="remove-image" id="removeRealImage" style="display:none;"><i class="fas fa-times"></i></button>
                     </div>
-
                     <div class="upload-box" id="xrayUploadBox">
                         <i class="fas fa-x-ray"></i>
                         <div class="label-text">الصورة الشعاعية <span class="required">*</span></div>
@@ -777,45 +167,25 @@
                         <img class="preview-img" id="xrayPreview" style="display:none;">
                         <div class="file-name" id="xrayFileName"></div>
                         <input type="file" id="xrayFileInput" accept="image/*" required>
-                        <button class="remove-image" id="removeXrayImage" style="display:none;">
-                            <i class="fas fa-times"></i>
-                        </button>
+                        <button class="remove-image" id="removeXrayImage" style="display:none;"><i class="fas fa-times"></i></button>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>قيمة KVP</label>
-                    <input type="text" id="kvp" placeholder="مثال: 70 kVp">
-                </div>
-
-                <div class="form-group">
-                    <label>قيمة MAS</label>
-                    <input type="text" id="mas" placeholder="مثال: 5 mAs">
-                </div>
-
-                <div class="form-group">
-                    <label>سنتر التصوير</label>
-                    <input type="text" id="center" placeholder="مثال: Midline, 2 cm above ...">
-                </div>
-
-                <div class="form-group full-width">
-                    <label>الغرض من الوضعية</label>
-                    <textarea id="purpose" placeholder="اذكر الغرض من هذه الوضعية ..."></textarea>
-                </div>
+                <div class="form-group"><label>قيمة KVP</label><input type="text" id="kvp" placeholder="مثال: 70 kVp"></div>
+                <div class="form-group"><label>قيمة MAS</label><input type="text" id="mas" placeholder="مثال: 5 mAs"></div>
+                <div class="form-group"><label>سنتر التصوير</label><input type="text" id="center" placeholder="مثال: Midline, 2 cm above ..."></div>
+                <div class="form-group full-width"><label>الغرض من الوضعية</label><textarea id="purpose" placeholder="اذكر الغرض من هذه الوضعية ..."></textarea></div>
 
                 <div class="btn-group">
                     <button type="submit" class="btn btn-primary" id="submitBtn">
-                        <i class="fas fa-save"></i>
-                        <span id="submitText">إضافة الوضعية</span>
+                        <i class="fas fa-save"></i> <span id="submitText">إضافة الوضعية</span>
                     </button>
                     <button type="button" class="btn btn-secondary" id="cancelBtn" style="display:none;">
-                        <i class="fas fa-times"></i>
-                        إلغاء
+                        <i class="fas fa-times"></i> إلغاء
                     </button>
                 </div>
             </div>
         </form>
-        
         <div id="statusMessage" class="status-message"></div>
     </div>
 
@@ -825,93 +195,62 @@
             <span>جميع الوضعيات المضافة</span>
             <span style="margin-right: auto; font-size: 0.9rem; color: #7f8c8d; font-weight: 400;" id="totalCount">(0)</span>
         </div>
-        
         <div class="filter-tools">
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="searchFilter" placeholder="ابحث عن وضعية بالاسم ...">
-            </div>
-            <div class="filter-select">
-                <i class="fas fa-filter"></i>
+            <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchFilter" placeholder="ابحث عن وضعية بالاسم ..."></div>
+            <div class="filter-select"><i class="fas fa-filter"></i>
                 <select id="regionFilter">
                     <option value="all">جميع المناطق</option>
-                    <option value="SKULL">SKULL</option>
-                    <option value="MANDIBLE">MANDIBLE</option>
-                    <option value="CERVICAL SPINE">CERVICAL SPINE</option>
-                    <option value="SHOULDER">SHOULDER</option>
-                    <option value="HUMERUS">HUMERUS</option>
-                    <option value="ELBOW">ELBOW</option>
-                    <option value="FOREARM">FOREARM</option>
-                    <option value="WRIST">WRIST</option>
-                    <option value="HAND">HAND</option>
-                    <option value="CHEST">CHEST</option>
-                    <option value="THORACIC VERTEBRAE">THORACIC VERTEBRAE</option>
-                    <option value="ABDOMEN">ABDOMEN</option>
-                    <option value="LUMBOSACRAL SPINE">LUMBOSACRAL SPINE</option>
-                    <option value="PELVIS">PELVIS</option>
-                    <option value="SACRUM COCCYX">SACRUM COCCYX</option>
-                    <option value="FEMUR">FEMUR</option>
-                    <option value="KNEE">KNEE</option>
-                    <option value="PATELLA">PATELLA</option>
-                    <option value="LEG">LEG</option>
-                    <option value="ANKLE">ANKLE</option>
+                    <option value="SKULL">SKULL</option><option value="MANDIBLE">MANDIBLE</option>
+                    <option value="CERVICAL SPINE">CERVICAL SPINE</option><option value="SHOULDER">SHOULDER</option>
+                    <option value="HUMERUS">HUMERUS</option><option value="ELBOW">ELBOW</option>
+                    <option value="FOREARM">FOREARM</option><option value="WRIST">WRIST</option>
+                    <option value="HAND">HAND</option><option value="CHEST">CHEST</option>
+                    <option value="THORACIC VERTEBRAE">THORACIC VERTEBRAE</option><option value="ABDOMEN">ABDOMEN</option>
+                    <option value="LUMBOSACRAL SPINE">LUMBOSACRAL SPINE</option><option value="PELVIS">PELVIS</option>
+                    <option value="SACRUM COCCYX">SACRUM COCCYX</option><option value="FEMUR">FEMUR</option>
+                    <option value="KNEE">KNEE</option><option value="PATELLA">PATELLA</option>
+                    <option value="LEG">LEG</option><option value="ANKLE">ANKLE</option>
                     <option value="FOOT">FOOT</option>
                 </select>
             </div>
         </div>
-        
         <div class="filter-stats">
             <span id="filterStats">عرض جميع الوضعيات</span>
             <div>
-                <button class="filter-clear" id="clearFilterBtn" disabled>
-                    <i class="fas fa-times-circle"></i> إلغاء التصفية
-                </button>
+                <button class="filter-clear" id="clearFilterBtn" disabled><i class="fas fa-times-circle"></i> إلغاء التصفية</button>
                 <span class="stats-badge" id="filterCount">0</span>
             </div>
         </div>
-        
-        <div class="loading-spinner" id="loadingSpinner">
-            <i class="fas fa-spinner"></i>
-            جاري تحميل البيانات ...
-        </div>
-        
+        <div class="loading-spinner" id="loadingSpinner"><i class="fas fa-spinner"></i> جاري تحميل البيانات ...</div>
         <div class="positions-list" id="positionsList"></div>
     </div>
 
-    <a href="user.html" class="back-link" target="_blank">
-        <i class="fas fa-arrow-left"></i>
-        العرض إلى صفحة المستخدم
-    </a>
+    <a href="user.html" class="back-link" target="_blank"><i class="fas fa-arrow-left"></i> الذهاب إلى صفحة المستخدم</a>
 </div>
 
+<!-- مودال الحذف -->
 <div class="modal-overlay" id="deleteModal">
     <div class="modal">
         <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #e74c3c; margin-bottom: 15px; display: block;"></i>
         <h3>تأكيد الحذف</h3>
         <p>هل أنت متأكد من حذف هذه الوضعية؟<br><strong id="deleteItemName" style="color: #2c3e50;"></strong></p>
         <div class="btn-group">
-            <button class="btn btn-danger" id="confirmDelete">
-                <i class="fas fa-trash"></i>
-                حذف
-            </button>
-            <button class="btn btn-secondary" id="cancelDelete">
-                <i class="fas fa-times"></i>
-                إلغاء
-            </button>
+            <button class="btn btn-danger" id="confirmDelete"><i class="fas fa-trash"></i> حذف</button>
+            <button class="btn btn-secondary" id="cancelDelete"><i class="fas fa-times"></i> إلغاء</button>
         </div>
     </div>
 </div>
 
 <script type="module">
-    // =============================================
+    // =====================================================
     // 1. استيراد Firebase
-    // =============================================
+    // =====================================================
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
     import { getDatabase, ref, onValue, push, set, remove } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-database.js";
 
-    // =============================================
-    // 2. إعداد Firebase
-    // =============================================
+    // =====================================================
+    // 2. إعدادات Firebase
+    // =====================================================
     const firebaseConfig = {
         apiKey: "AIzaSyCHTO1RQst9ts_4SR_Bd4Akb-4VljtNIOs",
         authDomain: "lunex-jewe.firebaseapp.com",
@@ -922,19 +261,19 @@
         appId: "1:79262821764:web:3113f4bde757af46f0c1d1",
         measurementId: "G-9ZE3SEMR38"
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // =============================================
-    // 3. إعداد Cloudinary
-    // =============================================
+    // =====================================================
+    // 3. إعدادات Cloudinary (يمكنك تعطيلها مؤقتاً)
+    // =====================================================
+    const USE_CLOUDINARY = true;  // غيّر إلى false لتجربة رفع الصور كـ base64
     const CLOUDINARY_CLOUD_NAME = "fl3npkvv";
     const CLOUDINARY_UPLOAD_PRESET = "Postion";
 
-    // =============================================
+    // =====================================================
     // 4. عناصر DOM
-    // =============================================
+    // =====================================================
     const form = document.getElementById('uploadForm');
     const formTitle = document.getElementById('formTitle');
     const submitBtn = document.getElementById('submitBtn');
@@ -955,28 +294,27 @@
     const deleteItemName = document.getElementById('deleteItemName');
     const confirmDelete = document.getElementById('confirmDelete');
     const cancelDelete = document.getElementById('cancelDelete');
+    const searchFilter = document.getElementById('searchFilter');
+    const regionFilter = document.getElementById('regionFilter');
+    const filterStats = document.getElementById('filterStats');
+    const filterCount = document.getElementById('filterCount');
+    const clearFilterBtn = document.getElementById('clearFilterBtn');
     
+    // صناديق الرفع
     const realUploadBox = document.getElementById('realUploadBox');
     const realFileInput = document.getElementById('realFileInput');
     const realPreview = document.getElementById('realPreview');
     const realFileName = document.getElementById('realFileName');
     const removeRealImage = document.getElementById('removeRealImage');
-
     const xrayUploadBox = document.getElementById('xrayUploadBox');
     const xrayFileInput = document.getElementById('xrayFileInput');
     const xrayPreview = document.getElementById('xrayPreview');
     const xrayFileName = document.getElementById('xrayFileName');
     const removeXrayImage = document.getElementById('removeXrayImage');
 
-    const searchFilter = document.getElementById('searchFilter');
-    const regionFilter = document.getElementById('regionFilter');
-    const filterStats = document.getElementById('filterStats');
-    const filterCount = document.getElementById('filterCount');
-    const clearFilterBtn = document.getElementById('clearFilterBtn');
-
-    // =============================================
+    // =====================================================
     // 5. متغيرات الحالة
-    // =============================================
+    // =====================================================
     let allData = [];
     let filteredData = [];
     let deleteTargetId = null;
@@ -985,19 +323,12 @@
     let existingRealUrl = '';
     let existingXrayUrl = '';
 
-    // =============================================
-    // 6. دوال رفع الصور
-    // =============================================
-    function setupUploadBox(box, fileInput, preview, fileNameDisplay, removeBtn, fileVarSetter, previewSetter) {
-        box.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            box.classList.add('dragover');
-        });
-        
-        box.addEventListener('dragleave', () => {
-            box.classList.remove('dragover');
-        });
-        
+    // =====================================================
+    // 6. دوال رفع الصور (مع دعم base64 كبديل)
+    // =====================================================
+    function setupUploadBox(box, fileInput, preview, fileNameDisplay, removeBtn, setFile, setPreview) {
+        box.addEventListener('dragover', (e) => { e.preventDefault(); box.classList.add('dragover'); });
+        box.addEventListener('dragleave', () => { box.classList.remove('dragover'); });
         box.addEventListener('drop', (e) => {
             e.preventDefault();
             box.classList.remove('dragover');
@@ -1005,30 +336,28 @@
             if (files.length > 0) {
                 const file = files[0];
                 if (file.type.startsWith('image/')) {
-                    fileVarSetter(file);
-                    previewSetter(file);
+                    setFile(file);
+                    setPreview(file);
                     box.classList.add('has-image');
                     removeBtn.style.display = 'flex';
                     fileNameDisplay.textContent = file.name;
                 }
             }
         });
-        
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
-                fileVarSetter(file);
-                previewSetter(file);
+                setFile(file);
+                setPreview(file);
                 box.classList.add('has-image');
                 removeBtn.style.display = 'flex';
                 fileNameDisplay.textContent = file.name;
             }
         });
-        
         removeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            fileVarSetter(null);
-            previewSetter(null);
+            setFile(null);
+            setPreview(null);
             box.classList.remove('has-image');
             removeBtn.style.display = 'none';
             fileNameDisplay.textContent = '';
@@ -1041,62 +370,45 @@
     setupUploadBox(
         realUploadBox, realFileInput, realPreview, realFileName, removeRealImage,
         (f) => { realFile = f; },
-        (f) => { 
+        (f) => {
             if (f) {
                 const reader = new FileReader();
-                reader.onload = (e) => {
-                    realPreview.src = e.target.result;
-                    realPreview.style.display = 'block';
-                };
+                reader.onload = (e) => { realPreview.src = e.target.result; realPreview.style.display = 'block'; };
                 reader.readAsDataURL(f);
-            } else {
-                realPreview.style.display = 'none';
-                realPreview.src = '';
-            }
+            } else { realPreview.style.display = 'none'; realPreview.src = ''; }
         }
     );
-
     setupUploadBox(
         xrayUploadBox, xrayFileInput, xrayPreview, xrayFileName, removeXrayImage,
         (f) => { xrayFile = f; },
-        (f) => { 
+        (f) => {
             if (f) {
                 const reader = new FileReader();
-                reader.onload = (e) => {
-                    xrayPreview.src = e.target.result;
-                    xrayPreview.style.display = 'block';
-                };
+                reader.onload = (e) => { xrayPreview.src = e.target.result; xrayPreview.style.display = 'block'; };
                 reader.readAsDataURL(f);
-            } else {
-                xrayPreview.style.display = 'none';
-                xrayPreview.src = '';
-            }
+            } else { xrayPreview.style.display = 'none'; xrayPreview.src = ''; }
         }
     );
 
-    // =============================================
-    // 7. دالة رفع الصور إلى Cloudinary
-    // =============================================
+    // =====================================================
+    // 7. دوال رفع الصور إلى Cloudinary أو تحويلها إلى base64
+    // =====================================================
     async function uploadToCloudinary(file) {
         if (!file) return null;
-        
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
         formData.append('cloud_name', CLOUDINARY_CLOUD_NAME);
         formData.append('folder', 'positions');
-        
         try {
             const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
                 method: 'POST',
                 body: formData
             });
-            
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'فشل رفع الصورة إلى Cloudinary');
+                const err = await response.json();
+                throw new Error(err.message || 'فشل رفع الصورة إلى Cloudinary');
             }
-            
             const data = await response.json();
             return data.secure_url;
         } catch (error) {
@@ -1105,58 +417,83 @@
         }
     }
 
-    // =============================================
-    // 8. دوال Firebase
-    // =============================================
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = (error) => reject(error);
+            reader.readAsDataURL(file);
+        });
+    }
 
-    function showStatus(message, type = 'info') {
+    async function uploadImages(realFile, xrayFile, existingRealUrl, existingXrayUrl) {
+        let realImgUrl = existingRealUrl;
+        let xrayImgUrl = existingXrayUrl;
+
+        if (realFile) {
+            if (USE_CLOUDINARY) {
+                realImgUrl = await uploadToCloudinary(realFile);
+            } else {
+                realImgUrl = await fileToBase64(realFile);
+            }
+            if (!realImgUrl) throw new Error('فشل في الحصول على رابط الصورة الحقيقية');
+        }
+        if (xrayFile) {
+            if (USE_CLOUDINARY) {
+                xrayImgUrl = await uploadToCloudinary(xrayFile);
+            } else {
+                xrayImgUrl = await fileToBase64(xrayFile);
+            }
+            if (!xrayImgUrl) throw new Error('فشل في الحصول على رابط الصورة الشعاعية');
+        }
+        return { realImgUrl, xrayImgUrl };
+    }
+
+    // =====================================================
+    // 8. دوال عرض الرسائل
+    // =====================================================
+    function showStatus(message, type = 'info', duration = 5000) {
         statusMsg.className = `status-message show ${type}`;
         statusMsg.innerHTML = message;
-        
-        if (type !== 'info') {
-            setTimeout(() => {
-                statusMsg.className = 'status-message';
-            }, 5000);
+        if (duration > 0 && type !== 'info') {
+            setTimeout(() => { statusMsg.className = 'status-message'; }, duration);
         }
     }
 
+    // =====================================================
+    // 9. تحميل البيانات من Firebase
+    // =====================================================
     function loadData() {
         loadingSpinner.classList.add('show');
         positionsList.innerHTML = '';
-        
         const dataRef = ref(db, 'positions');
         onValue(dataRef, (snapshot) => {
             loadingSpinner.classList.remove('show');
             const data = snapshot.val();
-            
             if (data) {
-                allData = Object.keys(data).map(key => ({
-                    id: key,
-                    ...data[key]
-                }));
-                applyFilters();
+                allData = Object.keys(data).map(key => ({ id: key, ...data[key] }));
             } else {
                 allData = [];
-                applyFilters();
             }
+            applyFilters();
         }, (error) => {
             loadingSpinner.classList.remove('show');
             showStatus('⚠️ حدث خطأ في تحميل البيانات: ' + error.message, 'error');
         });
     }
 
+    // =====================================================
+    // 10. التصفية والعرض
+    // =====================================================
     function applyFilters() {
         const searchTerm = searchFilter.value.trim().toLowerCase();
         const regionTerm = regionFilter.value;
-        
         filteredData = allData.filter(pos => {
             const nameMatch = !searchTerm || (pos.name && pos.name.toLowerCase().includes(searchTerm));
             const regionMatch = regionTerm === 'all' || pos.region === regionTerm;
             return nameMatch && regionMatch;
         });
-        
         filteredData.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-        
         updateStats();
         renderPositions(filteredData);
         clearFilterBtn.disabled = (searchTerm === '' && regionTerm === 'all');
@@ -1173,22 +510,9 @@
     function renderPositions(positions) {
         positionsList.innerHTML = '';
         if (positions.length === 0) {
-            const searchTerm = searchFilter.value.trim();
-            const regionTerm = regionFilter.value;
-            let message = 'لا توجد وضعيات ';
-            if (searchTerm) message += `تطابق البحث "${searchTerm}" `;
-            if (regionTerm !== 'all') message += `في منطقة ${regionTerm} `;
-            if (!searchTerm && regionTerm === 'all') message = 'لا توجد وضعيات مضافة بعد.';
-            positionsList.innerHTML = `
-                <div class="empty-state-admin">
-                    <i class="fas fa-inbox"></i>
-                    <p>${message}</p>
-                    <p style="font-size:0.9rem;color:#bdc3c7;">أضف أول وضعية من النموذج أعلاه</p>
-                </div>
-            `;
+            positionsList.innerHTML = `<div class="empty-state-admin"><i class="fas fa-inbox"></i><p>لا توجد وضعيات لعرضها</p></div>`;
             return;
         }
-        
         positions.forEach((pos, index) => {
             const div = document.createElement('div');
             div.className = 'position-item-admin';
@@ -1197,49 +521,38 @@
                     <div class="pos-icon">${index + 1}</div>
                     <div class="pos-details">
                         <div class="pos-name">${pos.name || 'بدون اسم'}</div>
-                        <div class="pos-region">
-                            <i class="fas fa-map-marker-alt"></i>
-                            ${pos.region || 'غير محدد'}
-                        </div>
+                        <div class="pos-region"><i class="fas fa-map-marker-alt"></i> ${pos.region || 'غير محدد'}</div>
                     </div>
                 </div>
                 <div class="pos-actions">
-                    <button class="btn btn-secondary btn-sm edit-btn" data-id="${pos.id}">
-                        <i class="fas fa-edit"></i>
-                        تعديل
-                    </button>
-                    <button class="btn btn-danger btn-sm delete-btn" data-id="${pos.id}">
-                        <i class="fas fa-trash"></i>
-                        حذف
-                    </button>
+                    <button class="btn btn-secondary btn-sm edit-btn" data-id="${pos.id}"><i class="fas fa-edit"></i> تعديل</button>
+                    <button class="btn btn-danger btn-sm delete-btn" data-id="${pos.id}"><i class="fas fa-trash"></i> حذف</button>
                 </div>
             `;
             positionsList.appendChild(div);
         });
-        
         document.querySelectorAll('.edit-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                const id = btn.dataset.id;
-                const pos = allData.find(p => p.id === id);
+                const pos = allData.find(p => p.id === btn.dataset.id);
                 if (pos) editPosition(pos);
             });
         });
-        
         document.querySelectorAll('.delete-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                const id = btn.dataset.id;
-                const pos = allData.find(p => p.id === id);
+                const pos = allData.find(p => p.id === btn.dataset.id);
                 if (pos) showDeleteModal(pos);
             });
         });
     }
 
+    // =====================================================
+    // 11. التعديل والحذف
+    // =====================================================
     function editPosition(pos) {
         formTitle.innerHTML = '<i class="fas fa-edit"></i> تعديل الوضعية';
         submitText.textContent = 'تحديث الوضعية';
         submitBtn.className = 'btn btn-success';
         cancelBtn.style.display = 'flex';
-        
         editId.value = pos.id;
         posName.value = pos.name || '';
         regionSelect.value = pos.region || '';
@@ -1247,7 +560,6 @@
         mas.value = pos.mas || '';
         center.value = pos.center || '';
         purpose.value = pos.purpose || '';
-        
         if (pos.realImg) {
             existingRealUrl = pos.realImg;
             realPreview.src = pos.realImg;
@@ -1264,7 +576,6 @@
             removeXrayImage.style.display = 'flex';
             xrayFileName.textContent = 'الصورة الحالية';
         }
-        
         form.scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -1275,16 +586,11 @@
         cancelBtn.style.display = 'none';
         editId.value = '';
         form.reset();
-        realFile = null;
-        xrayFile = null;
-        existingRealUrl = '';
-        existingXrayUrl = '';
-        realPreview.style.display = 'none';
-        xrayPreview.style.display = 'none';
-        realUploadBox.classList.remove('has-image');
-        xrayUploadBox.classList.remove('has-image');
-        removeRealImage.style.display = 'none';
-        removeXrayImage.style.display = 'none';
+        realFile = null; xrayFile = null;
+        existingRealUrl = ''; existingXrayUrl = '';
+        realPreview.style.display = 'none'; xrayPreview.style.display = 'none';
+        realUploadBox.classList.remove('has-image'); xrayUploadBox.classList.remove('has-image');
+        removeRealImage.style.display = 'none'; removeXrayImage.style.display = 'none';
         showStatus('', 'info');
     }
 
@@ -1305,9 +611,11 @@
         }
     }
 
+    // =====================================================
+    // 12. إرسال النموذج (حفظ البيانات)
+    // =====================================================
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         if (!realFile && !existingRealUrl) {
             showStatus('⚠️ يرجى رفع الصورة الحقيقية.', 'error');
             return;
@@ -1316,25 +624,15 @@
             showStatus('⚠️ يرجى رفع الصورة الشعاعية.', 'error');
             return;
         }
-        
+
         const id = editId.value;
-        let realImgUrl = existingRealUrl;
-        let xrayImgUrl = existingXrayUrl;
-        
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري رفع الصور والحفظ ...';
-        showStatus('📤 جاري رفع الصور إلى Cloudinary...', 'info');
-        
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الرفع والحفظ ...';
+        showStatus('📤 جاري معالجة الصور...', 'info', 0);
+
         try {
-            if (realFile) {
-                realImgUrl = await uploadToCloudinary(realFile);
-                if (!realImgUrl) throw new Error('فشل رفع الصورة الحقيقية');
-            }
-            if (xrayFile) {
-                xrayImgUrl = await uploadToCloudinary(xrayFile);
-                if (!xrayImgUrl) throw new Error('فشل رفع الصورة الشعاعية');
-            }
-            
+            const { realImgUrl, xrayImgUrl } = await uploadImages(realFile, xrayFile, existingRealUrl, existingXrayUrl);
+
             const data = {
                 name: posName.value.trim(),
                 region: regionSelect.value,
@@ -1346,57 +644,44 @@
                 purpose: purpose.value.trim(),
                 timestamp: Date.now()
             };
-            
+
             if (id) {
                 await set(ref(db, `positions/${id}`), data);
                 showStatus('✅ تم تحديث الوضعية بنجاح', 'success');
                 cancelEdit();
             } else {
-                const positionsRef = ref(db, 'positions');
-                await push(positionsRef, data);
+                await push(ref(db, 'positions'), data);
                 showStatus('✅ تم إضافة الوضعية بنجاح', 'success');
                 form.reset();
-                realFile = null;
-                xrayFile = null;
-                existingRealUrl = '';
-                existingXrayUrl = '';
-                realPreview.style.display = 'none';
-                xrayPreview.style.display = 'none';
-                realUploadBox.classList.remove('has-image');
-                xrayUploadBox.classList.remove('has-image');
-                removeRealImage.style.display = 'none';
-                removeXrayImage.style.display = 'none';
+                realFile = null; xrayFile = null;
+                existingRealUrl = ''; existingXrayUrl = '';
+                realPreview.style.display = 'none'; xrayPreview.style.display = 'none';
+                realUploadBox.classList.remove('has-image'); xrayUploadBox.classList.remove('has-image');
+                removeRealImage.style.display = 'none'; removeXrayImage.style.display = 'none';
             }
         } catch (error) {
-            showStatus('❌ حدث خطأ: ' + error.message, 'error');
+            console.error('تفاصيل الخطأ:', error);
+            showStatus(`❌ حدث خطأ: ${error.message || 'غير معروف'}`, 'error');
         } finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = `<i class="fas fa-save"></i> ${id ? 'تحديث الوضعية' : 'إضافة الوضعية'}`;
         }
     });
 
+    // =====================================================
+    // 13. الأحداث
+    // =====================================================
     cancelBtn.addEventListener('click', cancelEdit);
-    confirmDelete.addEventListener('click', () => {
-        if (deleteTargetId) deletePosition(deleteTargetId);
-    });
-    cancelDelete.addEventListener('click', () => {
-        deleteModal.classList.remove('show');
-        deleteTargetId = null;
-    });
-    deleteModal.addEventListener('click', (e) => {
-        if (e.target === deleteModal) {
-            deleteModal.classList.remove('show');
-            deleteTargetId = null;
-        }
-    });
+    confirmDelete.addEventListener('click', () => { if (deleteTargetId) deletePosition(deleteTargetId); });
+    cancelDelete.addEventListener('click', () => { deleteModal.classList.remove('show'); deleteTargetId = null; });
+    deleteModal.addEventListener('click', (e) => { if (e.target === deleteModal) { deleteModal.classList.remove('show'); deleteTargetId = null; } });
     searchFilter.addEventListener('input', applyFilters);
     regionFilter.addEventListener('change', applyFilters);
-    clearFilterBtn.addEventListener('click', () => {
-        searchFilter.value = '';
-        regionFilter.value = 'all';
-        applyFilters();
-    });
+    clearFilterBtn.addEventListener('click', () => { searchFilter.value = ''; regionFilter.value = 'all'; applyFilters(); });
 
+    // =====================================================
+    // 14. بدء التطبيق
+    // =====================================================
     loadData();
 </script>
 
