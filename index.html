@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* نفس الأنماط التي كانت لديك مع تحسينات بسيطة */
+        /* نفس الأنماط السابقة (حافظ عليها كما هي) */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
         body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
         .container { max-width: 900px; margin: 0 auto; }
@@ -243,31 +243,32 @@
 
 <script type="module">
     // =====================================================
-    // 1. استيراد Firebase
+    // 1. استيراد Firebase (الإصدار 12.17.1)
     // =====================================================
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-    import { getDatabase, ref, onValue, push, set, remove } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+    import { getDatabase, ref, onValue, push, set, remove } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
 
     // =====================================================
-    // 2. إعدادات Firebase
+    // 2. إعدادات Firebase الجديدة
     // =====================================================
     const firebaseConfig = {
-        apiKey: "AIzaSyCHTO1RQst9ts_4SR_Bd4Akb-4VljtNIOs",
-        authDomain: "lunex-jewe.firebaseapp.com",
-        databaseURL: "https://lunex-jewe-default-rtdb.firebaseio.com",
-        projectId: "lunex-jewe",
-        storageBucket: "lunex-jewe.firebasestorage.app",
-        messagingSenderId: "79262821764",
-        appId: "1:79262821764:web:3113f4bde757af46f0c1d1",
-        measurementId: "G-9ZE3SEMR38"
+        apiKey: "AIzaSyDnNv3tekrHervtMjYk2nv0vluN83dTOrw",
+        authDomain: "xraystop-d13d3.firebaseapp.com",
+        databaseURL: "https://xraystop-d13d3-default-rtdb.firebaseio.com",
+        projectId: "xraystop-d13d3",
+        storageBucket: "xraystop-d13d3.firebasestorage.app",
+        messagingSenderId: "597257727564",
+        appId: "1:597257727564:web:198421df2f0b5206b04ee9",
+        measurementId: "G-QV6RQ3JR3Y"
     };
+
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
     // =====================================================
-    // 3. إعدادات Cloudinary (يمكنك تعطيلها مؤقتاً)
+    // 3. إعدادات Cloudinary (نفس الإعدادات السابقة)
     // =====================================================
-    const USE_CLOUDINARY = true;  // غيّر إلى false لتجربة رفع الصور كـ base64
+    const USE_CLOUDINARY = true;
     const CLOUDINARY_CLOUD_NAME = "fl3npkvv";
     const CLOUDINARY_UPLOAD_PRESET = "Postion";
 
@@ -324,7 +325,7 @@
     let existingXrayUrl = '';
 
     // =====================================================
-    // 6. دوال رفع الصور (مع دعم base64 كبديل)
+    // 6. دوال رفع الصور (نفس السابق)
     // =====================================================
     function setupUploadBox(box, fileInput, preview, fileNameDisplay, removeBtn, setFile, setPreview) {
         box.addEventListener('dragover', (e) => { e.preventDefault(); box.classList.add('dragover'); });
@@ -391,7 +392,7 @@
     );
 
     // =====================================================
-    // 7. دوال رفع الصور إلى Cloudinary أو تحويلها إلى base64
+    // 7. دوال رفع الصور (Cloudinary أو Base64)
     // =====================================================
     async function uploadToCloudinary(file) {
         if (!file) return null;
@@ -461,24 +462,42 @@
     }
 
     // =====================================================
-    // 9. تحميل البيانات من Firebase
+    // 9. تحميل البيانات من Firebase (مع رسائل تصحيح)
     // =====================================================
     function loadData() {
         loadingSpinner.classList.add('show');
         positionsList.innerHTML = '';
+        showStatus('⏳ جاري تحميل البيانات من Firebase...', 'info', 0);
+
         const dataRef = ref(db, 'positions');
         onValue(dataRef, (snapshot) => {
             loadingSpinner.classList.remove('show');
             const data = snapshot.val();
+            console.log('📦 البيانات الخام المستلمة من Firebase:', data);
+
             if (data) {
-                allData = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+                // تحويل الكائن إلى مصفوفة مع إضافة id
+                allData = Object.keys(data).map(key => {
+                    const item = data[key];
+                    // التأكد من وجود region، وإلا نضع قيمة افتراضية
+                    if (!item.region) {
+                        console.warn(`⚠️ الوضعية "${item.name || 'بدون اسم'}" ليس لها حقل region، تم تعيين 'OTHER' افتراضياً.`);
+                        item.region = 'OTHER';
+                    }
+                    return { id: key, ...item };
+                });
+                console.log(`✅ تم تحميل ${allData.length} وضعية بنجاح.`);
+                showStatus(`✅ تم تحميل ${allData.length} وضعية.`, 'success', 3000);
             } else {
                 allData = [];
+                console.warn('⚠️ لا توجد بيانات في Firebase (positions).');
+                showStatus('⚠️ لا توجد بيانات حالياً. أضف وضعيات جديدة.', 'error');
             }
             applyFilters();
         }, (error) => {
             loadingSpinner.classList.remove('show');
-            showStatus('⚠️ حدث خطأ في تحميل البيانات: ' + error.message, 'error');
+            console.error('❌ خطأ في قراءة البيانات:', error);
+            showStatus(`❌ فشل تحميل البيانات: ${error.message}`, 'error');
         });
     }
 
@@ -531,6 +550,7 @@
             `;
             positionsList.appendChild(div);
         });
+        // إضافة مستمعي الأحداث للأزرار
         document.querySelectorAll('.edit-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const pos = allData.find(p => p.id === btn.dataset.id);
