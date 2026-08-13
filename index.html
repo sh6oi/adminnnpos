@@ -2,255 +2,656 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
     <title>لوحة الإدارة - وضعيات التصوير الشعاعي</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* نفس الأنماط السابقة (حافظ عليها كما هي) */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
-        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 30px; padding: 30px 20px; background: rgba(255,255,255,0.95); border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
-        .header h1 { color: #2c3e50; font-weight: 800; font-size: 2rem; display: flex; align-items: center; justify-content: center; gap: 12px; }
+        body { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; 
+            padding: 10px;
+            overflow-y: auto;
+        }
+        
+        .admin-login-screen {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            padding: 15px;
+        }
+        .admin-login-screen.hidden { display: none; }
+        .admin-login-box {
+            background: white;
+            border-radius: 20px;
+            padding: 30px 20px;
+            max-width: 380px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .admin-login-box i { font-size: 3rem; color: #667eea; margin-bottom: 10px; }
+        .admin-login-box h2 { color: #2c3e50; margin-bottom: 5px; font-size: 1.5rem; }
+        .admin-login-box p { color: #7f8c8d; margin-bottom: 20px; font-size: 0.9rem; }
+        .admin-login-box .form-group { margin-bottom: 12px; text-align: right; }
+        .admin-login-box label { display: block; font-weight: 600; margin-bottom: 5px; color: #2c3e50; font-size: 0.85rem; }
+        .admin-login-box input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 0.95rem;
+        }
+        .admin-login-box input:focus { border-color: #667eea; outline: none; }
+        .admin-login-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .admin-login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .admin-login-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 15px;
+            display: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .container { max-width: 100%; margin: 0 auto; }
+        .main-content { display: none; }
+        .main-content.show { display: block; }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .header h1 { color: #2c3e50; font-weight: 800; font-size: 1.3rem; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
         .header h1 i { color: #667eea; }
-        .header .subtitle { color: #7f8c8d; font-size: 1rem; margin-top: 8px; }
-        .card { background: rgba(255,255,255,0.95); border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
-        .card-title { display: flex; align-items: center; gap: 10px; color: #2c3e50; font-weight: 700; font-size: 1.2rem; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f1f2f6; }
-        .card-title i { color: #667eea; font-size: 1.4rem; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group.full-width { grid-column: 1 / -1; }
-        label { display: block; font-weight: 600; margin-bottom: 6px; color: #2c3e50; font-size: 0.9rem; }
-        label .required { color: #e74c3c; }
-        input, select, textarea { width: 100%; padding: 12px 15px; border: 2px solid #e9ecef; border-radius: 12px; font-size: 0.95rem; background: #f8f9fa; transition: all 0.3s ease; font-family: 'Cairo', sans-serif; }
-        input:focus, select:focus, textarea:focus { border-color: #667eea; outline: none; background: white; box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1); }
-        textarea { min-height: 80px; resize: vertical; }
-        .btn-group { display: flex; gap: 12px; margin-top: 10px; grid-column: 1 / -1; }
-        .btn { padding: 14px 28px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; flex: 1; }
-        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); }
+        .header .subtitle { color: #7f8c8d; font-size: 0.8rem; margin-top: 5px; }
+        .logout-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            z-index: 10;
+        }
+        
+        .admin-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            background: white;
+            padding: 10px;
+            border-radius: 14px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+        .admin-tab {
+            flex: 1;
+            min-width: 90px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 700;
+            color: #7f8c8d;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            background: #f8f9fa;
+            border: 2px solid transparent;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+        .admin-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #2c3e50;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f1f2f6;
+        }
+        .card-title i { color: #667eea; }
+        .form-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .form-group { margin-bottom: 10px; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; color: #2c3e50; font-size: 0.85rem; }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            background: #f8f9fa;
+            font-family: 'Cairo', sans-serif;
+        }
+        textarea { min-height: 60px; resize: vertical; }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-success { background: #2ecc71; color: white; }
+        .btn-warning { background: #f39c12; color: white; }
         .btn-secondary { background: #e9ecef; color: #2c3e50; }
-        .btn-secondary:hover { background: #dde1e6; }
-        .btn-danger { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3); }
-        .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4); }
-        .btn-success { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3); }
-        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
-        .upload-group { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .upload-box { background: #f8f9fa; border: 2px dashed #bdc3c7; border-radius: 16px; padding: 20px; text-align: center; transition: all 0.3s ease; cursor: pointer; position: relative; min-height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .upload-box.dragover { border-color: #667eea; background: #eef1ff; transform: scale(1.01); }
-        .upload-box.has-image { border-color: #2ecc71; border-style: solid; background: #f0fff4; }
-        .upload-box i { font-size: 2.5rem; color: #bdc3c7; margin-bottom: 8px; }
-        .upload-box .label-text { font-weight: 600; color: #7f8c8d; }
-        .upload-box .sub-text { font-size: 0.8rem; color: #bdc3c7; }
-        .upload-box .preview-img { max-width: 100%; max-height: 120px; object-fit: contain; border-radius: 10px; margin-top: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .btn-sm { padding: 6px 10px; font-size: 0.75rem; }
+        
+        .upload-group { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .upload-box {
+            background: #f8f9fa;
+            border: 2px dashed #bdc3c7;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .upload-box.has-image { border-color: #2ecc71; border-style: solid; }
+        .upload-box i { font-size: 2rem; color: #bdc3c7; margin-bottom: 5px; }
+        .upload-box .preview-img { max-width: 100%; max-height: 80px; object-fit: contain; border-radius: 8px; margin-top: 5px; }
         .upload-box input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-        .upload-box .file-name { font-size: 0.8rem; color: #2c3e50; margin-top: 6px; font-weight: 600; }
-        .upload-box .remove-image { position: absolute; top: 8px; right: 8px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; transition: all 0.2s ease; z-index: 10; }
-        .upload-box .remove-image:hover { transform: scale(1.1); background: #c0392b; }
-        .status-message { padding: 15px 20px; border-radius: 12px; margin-top: 15px; display: none; align-items: center; gap: 10px; font-weight: 600; }
-        .status-message.show { display: flex; }
-        .status-message.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .status-message.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .status-message.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
-        .loading-spinner { display: none; text-align: center; padding: 30px; color: #7f8c8d; }
+        .upload-box .remove-image {
+            position: absolute;
+            top: 5px; right: 5px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px; height: 25px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        .status-message {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            display: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        .status-message.show { display: block; }
+        .status-message.success { background: #d4edda; color: #155724; }
+        .status-message.error { background: #f8d7da; color: #721c24; }
+        .status-message.info { background: #d1ecf1; color: #0c5460; }
+        
+        .loading-spinner { display: none; text-align: center; padding: 20px; color: #7f8c8d; }
         .loading-spinner.show { display: block; }
-        .loading-spinner i { font-size: 2rem; animation: spin 1s linear infinite; display: block; margin-bottom: 10px; }
+        .loading-spinner i { font-size: 1.5rem; animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .position-item-admin { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; background: #f8f9fa; border-radius: 14px; margin-bottom: 12px; transition: all 0.3s ease; border-right: 4px solid #667eea; }
-        .position-item-admin:hover { background: #f1f3f5; transform: translateX(-5px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .position-item-admin .pos-info { display: flex; align-items: center; gap: 15px; flex: 1; }
-        .position-item-admin .pos-info .pos-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
-        .position-item-admin .pos-info .pos-details { flex: 1; min-width: 0; }
-        .position-item-admin .pos-info .pos-details .pos-name { font-weight: 700; color: #2c3e50; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .position-item-admin .pos-info .pos-details .pos-region { font-size: 0.85rem; color: #7f8c8d; display: flex; align-items: center; gap: 6px; margin-top: 2px; }
-        .position-item-admin .pos-actions { display: flex; gap: 8px; flex-shrink: 0; }
-        .position-item-admin .pos-actions .btn { padding: 6px 12px; font-size: 0.8rem; }
-        .filter-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f1f2f6; }
-        .filter-tools .search-box { position: relative; display: flex; align-items: center; }
-        .filter-tools .search-box i { position: absolute; right: 15px; color: #bdc3c7; font-size: 1.1rem; }
-        .filter-tools .search-box input { padding-right: 45px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; width: 100%; padding: 10px 15px 10px 45px; font-size: 0.95rem; transition: all 0.3s ease; }
-        .filter-tools .search-box input:focus { border-color: #667eea; background: white; box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1); }
-        .filter-tools .filter-select { position: relative; display: flex; align-items: center; }
-        .filter-tools .filter-select i { position: absolute; right: 15px; color: #bdc3c7; font-size: 1.1rem; pointer-events: none; }
-        .filter-tools .filter-select select { padding-right: 45px; appearance: none; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; width: 100%; padding: 10px 15px 10px 45px; font-size: 0.95rem; cursor: pointer; transition: all 0.3s ease; }
-        .filter-tools .filter-select select:focus { border-color: #667eea; background: white; box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1); }
-        .filter-stats { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 0.9rem; color: #7f8c8d; }
-        .filter-stats .stats-badge { background: #e9ecef; padding: 4px 14px; border-radius: 20px; font-weight: 600; }
-        .filter-clear { color: #e74c3c; cursor: pointer; font-size: 0.85rem; padding: 4px 12px; border-radius: 8px; transition: all 0.3s ease; background: #f8f9fa; border: none; font-weight: 600; }
-        .filter-clear:hover { background: #fee; color: #c0392b; }
-        .filter-clear:disabled { opacity: 0.5; cursor: not-allowed; }
-        .empty-state-admin { text-align: center; padding: 40px 20px; color: #7f8c8d; }
-        .empty-state-admin i { font-size: 3rem; color: #bdc3c7; margin-bottom: 15px; display: block; }
-        .back-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; color: white; text-decoration: none; font-weight: 600; padding: 12px 24px; background: rgba(255,255,255,0.15); border-radius: 12px; transition: all 0.3s ease; backdrop-filter: blur(5px); }
-        .back-link:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 1000; align-items: center; justify-content: center; }
-        .modal-overlay.show { display: flex; }
-        .modal { background: white; border-radius: 24px; padding: 30px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: modalIn 0.3s ease-out; }
-        @keyframes modalIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        .modal h3 { color: #2c3e50; margin-bottom: 10px; }
-        .modal p { color: #7f8c8d; margin-bottom: 20px; }
-        .modal .btn-group { display: flex; gap: 12px; justify-content: center; }
-        .modal .btn-group .btn { flex: 1; max-width: 150px; }
-        @media (max-width: 768px) {
-            .form-grid, .upload-group, .filter-tools { grid-template-columns: 1fr; }
-            .btn-group { flex-direction: column; }
-            .position-item-admin { flex-direction: column; gap: 12px; align-items: stretch; }
-            .position-item-admin .pos-info { flex-direction: column; align-items: flex-start; gap: 8px; }
-            .position-item-admin .pos-actions { justify-content: flex-end; }
+        
+        .category-section { margin-bottom: 20px; }
+        .category-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .category-header i { font-size: 1.2rem; }
+        .category-header .count-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            margin-right: auto;
+        }
+        .category-positions { padding-right: 10px; }
+        
+        .position-item-admin {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            border-right: 4px solid #667eea;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .position-actions { display: flex; gap: 5px; }
+        
+        .user-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-right: 4px solid #667eea;
+        }
+        .user-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .user-info-details { flex: 1; min-width: 150px; }
+        .user-name { font-weight: 700; color: #2c3e50; font-size: 0.95rem; }
+        .user-email { color: #7f8c8d; font-size: 0.8rem; }
+        .user-status {
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+        .status-none { background: #e9ecef; color: #7f8c8d; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-approved { background: #d4edda; color: #155724; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
+        
+        .subscription-info {
+            background: #e8f5e9;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+        }
+        .subscription-info div {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 3px;
+        }
+        .subscription-info i { color: #2ecc71; }
+        
+        .user-actions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .user-actions .btn { flex: 1; min-width: 80px; }
+        
+        .edit-user-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .edit-user-modal.show { display: flex; }
+        .edit-user-content {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .edit-user-content h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .search-box {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        .search-box i {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #bdc3c7;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 10px 35px 10px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .filter-tools {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .filter-tools select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            background: #f8f9fa;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 30px 15px;
+            color: #7f8c8d;
+        }
+        .empty-state i { font-size: 2.5rem; color: #bdc3c7; margin-bottom: 10px; display: block; }
+        
+        @media (min-width: 768px) {
+            body { padding: 20px; }
+            .container { max-width: 900px; }
+            .form-grid { grid-template-columns: 1fr 1fr; }
+            .upload-group { grid-template-columns: 1fr 1fr; }
+            .filter-tools { grid-template-columns: 1fr 1fr; }
+            .header h1 { font-size: 2rem; }
+            .card { padding: 25px; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h1><i class="fas fa-cog"></i> لوحة الإدارة</h1>
-        <p class="subtitle">إدارة وضعيات التصوير الشعاعي - إضافة، تعديل، حذف</p>
+<!-- شاشة تسجيل الدخول -->
+<div class="admin-login-screen" id="adminLoginScreen">
+    <div class="admin-login-box">
+        <i class="fas fa-shield-alt"></i>
+        <h2>لوحة الإدارة</h2>
+        <p>تسجيل الدخول للأدمن فقط</p>
+        <div class="form-group">
+            <label>البريد الإلكتروني</label>
+            <input type="email" id="adminEmail" placeholder="admin@example.com">
+        </div>
+        <div class="form-group">
+            <label>كلمة المرور</label>
+            <input type="password" id="adminPassword" placeholder="••••••••">
+        </div>
+        <button class="admin-login-btn" id="adminLoginBtn">
+            <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+        </button>
+        <div class="admin-login-error" id="adminLoginError"></div>
     </div>
-
-    <div class="card">
-        <div class="card-title">
-            <i class="fas fa-plus-circle"></i>
-            <span id="formTitle">إضافة وضعية جديدة</span>
-        </div>
-        <form id="uploadForm">
-            <input type="hidden" id="editId" value="">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>اسم الوضعية <span class="required">*</span></label>
-                    <input type="text" id="posName" placeholder="مثال: AP Skull" required>
-                </div>
-                <div class="form-group">
-                    <label>المنطقة <span class="required">*</span></label>
-                    <select id="regionSelect" required>
-                        <option value="">-- اختر المنطقة --</option>
-                        <option value="SKULL">SKULL</option>
-                        <option value="MANDIBLE">MANDIBLE</option>
-                        <option value="CERVICAL SPINE">CERVICAL SPINE</option>
-                        <option value="SHOULDER">SHOULDER</option>
-                        <option value="HUMERUS">HUMERUS</option>
-                        <option value="ELBOW">ELBOW</option>
-                        <option value="FOREARM">FOREARM</option>
-                        <option value="WRIST">WRIST</option>
-                        <option value="HAND">HAND</option>
-                        <option value="CHEST">CHEST</option>
-                        <option value="THORACIC VERTEBRAE">THORACIC VERTEBRAE</option>
-                        <option value="ABDOMEN">ABDOMEN</option>
-                        <option value="LUMBOSACRAL SPINE">LUMBOSACRAL SPINE</option>
-                        <option value="PELVIS">PELVIS</option>
-                        <option value="SACRUM COCCYX">SACRUM COCCYX</option>
-                        <option value="FEMUR">FEMUR</option>
-                        <option value="KNEE">KNEE</option>
-                        <option value="PATELLA">PATELLA</option>
-                        <option value="LEG">LEG</option>
-                        <option value="ANKLE">ANKLE</option>
-                        <option value="FOOT">FOOT</option>
-                    </select>
-                </div>
-
-                <div class="upload-group">
-                    <div class="upload-box" id="realUploadBox">
-                        <i class="fas fa-camera"></i>
-                        <div class="label-text">الصورة الحقيقية <span class="required">*</span></div>
-                        <div class="sub-text">اضغط أو اسحب الصورة هنا</div>
-                        <img class="preview-img" id="realPreview" style="display:none;">
-                        <div class="file-name" id="realFileName"></div>
-                        <input type="file" id="realFileInput" accept="image/*" required>
-                        <button class="remove-image" id="removeRealImage" style="display:none;"><i class="fas fa-times"></i></button>
-                    </div>
-                    <div class="upload-box" id="xrayUploadBox">
-                        <i class="fas fa-x-ray"></i>
-                        <div class="label-text">الصورة الشعاعية <span class="required">*</span></div>
-                        <div class="sub-text">اضغط أو اسحب الصورة هنا</div>
-                        <img class="preview-img" id="xrayPreview" style="display:none;">
-                        <div class="file-name" id="xrayFileName"></div>
-                        <input type="file" id="xrayFileInput" accept="image/*" required>
-                        <button class="remove-image" id="removeXrayImage" style="display:none;"><i class="fas fa-times"></i></button>
-                    </div>
-                </div>
-
-                <div class="form-group"><label>قيمة KVP</label><input type="text" id="kvp" placeholder="مثال: 70 kVp"></div>
-                <div class="form-group"><label>قيمة MAS</label><input type="text" id="mas" placeholder="مثال: 5 mAs"></div>
-                <div class="form-group"><label>سنتر التصوير</label><input type="text" id="center" placeholder="مثال: Midline, 2 cm above ..."></div>
-                <div class="form-group full-width"><label>الغرض من الوضعية</label><textarea id="purpose" placeholder="اذكر الغرض من هذه الوضعية ..."></textarea></div>
-
-                <div class="btn-group">
-                    <button type="submit" class="btn btn-primary" id="submitBtn">
-                        <i class="fas fa-save"></i> <span id="submitText">إضافة الوضعية</span>
-                    </button>
-                    <button type="button" class="btn btn-secondary" id="cancelBtn" style="display:none;">
-                        <i class="fas fa-times"></i> إلغاء
-                    </button>
-                </div>
-            </div>
-        </form>
-        <div id="statusMessage" class="status-message"></div>
-    </div>
-
-    <div class="card">
-        <div class="card-title">
-            <i class="fas fa-list"></i>
-            <span>جميع الوضعيات المضافة</span>
-            <span style="margin-right: auto; font-size: 0.9rem; color: #7f8c8d; font-weight: 400;" id="totalCount">(0)</span>
-        </div>
-        <div class="filter-tools">
-            <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchFilter" placeholder="ابحث عن وضعية بالاسم ..."></div>
-            <div class="filter-select"><i class="fas fa-filter"></i>
-                <select id="regionFilter">
-                    <option value="all">جميع المناطق</option>
-                    <option value="SKULL">SKULL</option><option value="MANDIBLE">MANDIBLE</option>
-                    <option value="CERVICAL SPINE">CERVICAL SPINE</option><option value="SHOULDER">SHOULDER</option>
-                    <option value="HUMERUS">HUMERUS</option><option value="ELBOW">ELBOW</option>
-                    <option value="FOREARM">FOREARM</option><option value="WRIST">WRIST</option>
-                    <option value="HAND">HAND</option><option value="CHEST">CHEST</option>
-                    <option value="THORACIC VERTEBRAE">THORACIC VERTEBRAE</option><option value="ABDOMEN">ABDOMEN</option>
-                    <option value="LUMBOSACRAL SPINE">LUMBOSACRAL SPINE</option><option value="PELVIS">PELVIS</option>
-                    <option value="SACRUM COCCYX">SACRUM COCCYX</option><option value="FEMUR">FEMUR</option>
-                    <option value="KNEE">KNEE</option><option value="PATELLA">PATELLA</option>
-                    <option value="LEG">LEG</option><option value="ANKLE">ANKLE</option>
-                    <option value="FOOT">FOOT</option>
-                </select>
-            </div>
-        </div>
-        <div class="filter-stats">
-            <span id="filterStats">عرض جميع الوضعيات</span>
-            <div>
-                <button class="filter-clear" id="clearFilterBtn" disabled><i class="fas fa-times-circle"></i> إلغاء التصفية</button>
-                <span class="stats-badge" id="filterCount">0</span>
-            </div>
-        </div>
-        <div class="loading-spinner" id="loadingSpinner"><i class="fas fa-spinner"></i> جاري تحميل البيانات ...</div>
-        <div class="positions-list" id="positionsList"></div>
-    </div>
-
-    <a href="user.html" class="back-link" target="_blank"><i class="fas fa-arrow-left"></i> الذهاب إلى صفحة المستخدم</a>
 </div>
 
-<!-- مودال الحذف -->
-<div class="modal-overlay" id="deleteModal">
-    <div class="modal">
-        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #e74c3c; margin-bottom: 15px; display: block;"></i>
-        <h3>تأكيد الحذف</h3>
-        <p>هل أنت متأكد من حذف هذه الوضعية؟<br><strong id="deleteItemName" style="color: #2c3e50;"></strong></p>
-        <div class="btn-group">
-            <button class="btn btn-danger" id="confirmDelete"><i class="fas fa-trash"></i> حذف</button>
-            <button class="btn btn-secondary" id="cancelDelete"><i class="fas fa-times"></i> إلغاء</button>
+<!-- الواجهة الرئيسية -->
+<div class="main-content" id="mainContent">
+    <div class="container">
+        <div class="header">
+            <button class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i> خروج
+            </button>
+            <h1><i class="fas fa-cog"></i> لوحة الإدارة</h1>
+            <p class="subtitle">إدارة الوضعيات والمستخدمين</p>
+        </div>
+
+        <div class="admin-tabs">
+            <div class="admin-tab active" data-tab="positions">
+                <i class="fas fa-image"></i> الوضعيات
+            </div>
+            <div class="admin-tab" data-tab="users">
+                <i class="fas fa-users"></i> المستخدمين
+            </div>
+        </div>
+
+        <!-- تبويب الوضعيات -->
+        <div class="tab-content active" id="positionsTab">
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-plus-circle"></i>
+                    <span id="formTitle">إضافة وضعية جديدة</span>
+                </div>
+                <form id="uploadForm">
+                    <input type="hidden" id="editingPositionId" value="">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>اسم الوضعية *</label>
+                            <input type="text" id="posName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>المنطقة *</label>
+                            <select id="regionSelect" required>
+                                <option value="">-- اختر --</option>
+                                <option value="SKULL">SKULL</option>
+                                <option value="CHEST">CHEST</option>
+                                <option value="ABDOMEN">ABDOMEN</option>
+                                <option value="PELVIS">PELVIS</option>
+                                <option value="KNEE">KNEE</option>
+                                <option value="FOOT">FOOT</option>
+                                <option value="HAND">HAND</option>
+                                <option value="WRIST">WRIST</option>
+                                <option value="ELBOW">ELBOW</option>
+                                <option value="SHOULDER">SHOULDER</option>
+                                <option value="ANKLE">ANKLE</option>
+                                <option value="LEG">LEG</option>
+                                <option value="FEMUR">FEMUR</option>
+                                <option value="MANDIBLE">MANDIBLE</option>
+                                <option value="CERVICAL SPINE">CERVICAL SPINE</option>
+                                <option value="HUMERUS">HUMERUS</option>
+                                <option value="FOREARM">FOREARM</option>
+                                <option value="THORACIC VERTEBRAE">THORACIC VERTEBRAE</option>
+                                <option value="LUMBOSACRAL SPINE">LUMBOSACRAL SPINE</option>
+                                <option value="SACRUM COCCYX">SACRUM COCCYX</option>
+                                <option value="PATELLA">PATELLA</option>
+                            </select>
+                        </div>
+                        <div class="upload-group">
+                            <div class="upload-box" id="realUploadBox">
+                                <i class="fas fa-camera"></i>
+                                <div>الصورة الحقيقية *</div>
+                                <img class="preview-img" id="realPreview" style="display:none;">
+                                <input type="file" id="realFileInput" accept="image/*">
+                                <button type="button" class="remove-image" id="removeRealImage"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div class="upload-box" id="xrayUploadBox">
+                                <i class="fas fa-x-ray"></i>
+                                <div>الصورة الشعاعية *</div>
+                                <img class="preview-img" id="xrayPreview" style="display:none;">
+                                <input type="file" id="xrayFileInput" accept="image/*">
+                                <button type="button" class="remove-image" id="removeXrayImage"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-group"><label>KVP</label><input type="text" id="kvp"></div>
+                        <div class="form-group"><label>MAS</label><input type="text" id="mas"></div>
+                        <div class="form-group"><label>سنتر التصوير</label><input type="text" id="center"></div>
+                        <div class="form-group"><label>الغرض</label><textarea id="purpose"></textarea></div>
+                        <div style="display:flex; gap:10px;">
+                            <button type="submit" class="btn btn-primary" style="flex:1;">
+                                <i class="fas fa-save"></i> <span id="submitText">حفظ</span>
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="cancelEditBtn" onclick="cancelEdit()" style="flex:1; display:none;">
+                                <i class="fas fa-times"></i> إلغاء التعديل
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <div id="statusMessage" class="status-message"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-list"></i>
+                    <span>جميع الوضعيات (مصنفة حسب المنطقة)</span>
+                </div>
+                
+                <div class="filter-tools">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <select id="categoryFilter">
+                            <option value="all">جميع المناطق</option>
+                            <option value="SKULL">SKULL</option>
+                            <option value="CHEST">CHEST</option>
+                            <option value="ABDOMEN">ABDOMEN</option>
+                            <option value="PELVIS">PELVIS</option>
+                            <option value="KNEE">KNEE</option>
+                            <option value="FOOT">FOOT</option>
+                            <option value="HAND">HAND</option>
+                            <option value="WRIST">WRIST</option>
+                            <option value="ELBOW">ELBOW</option>
+                            <option value="SHOULDER">SHOULDER</option>
+                            <option value="ANKLE">ANKLE</option>
+                            <option value="LEG">LEG</option>
+                            <option value="FEMUR">FEMUR</option>
+                            <option value="MANDIBLE">MANDIBLE</option>
+                            <option value="CERVICAL SPINE">CERVICAL SPINE</option>
+                            <option value="HUMERUS">HUMERUS</option>
+                            <option value="FOREARM">FOREARM</option>
+                            <option value="THORACIC VERTEBRAE">THORACIC VERTEBRAE</option>
+                            <option value="LUMBOSACRAL SPINE">LUMBOSACRAL SPINE</option>
+                            <option value="SACRUM COCCYX">SACRUM COCCYX</option>
+                            <option value="PATELLA">PATELLA</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <input type="text" id="positionSearch" placeholder="🔍 بحث عن وضعية...">
+                    </div>
+                </div>
+                
+                <div id="positionsList"></div>
+            </div>
+        </div>
+
+        <!-- تبويب المستخدمين -->
+        <div class="tab-content" id="usersTab">
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-users"></i>
+                    <span>إدارة المستخدمين</span>
+                </div>
+                
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="userSearchInput" placeholder="ابحث عن مستخدم بالاسم أو البريد...">
+                </div>
+                
+                <div id="usersList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- نافذة تعديل المستخدم -->
+<div class="edit-user-modal" id="editUserModal">
+    <div class="edit-user-content">
+        <h3><i class="fas fa-user-edit"></i> تعديل المستخدم</h3>
+        <input type="hidden" id="editUserId">
+        <div class="form-group">
+            <label>اسم المستخدم</label>
+            <input type="text" id="editUsername">
+        </div>
+        <div class="form-group">
+            <label>البريد الإلكتروني</label>
+            <input type="email" id="editUserEmail">
+        </div>
+        <div class="form-group">
+            <label>حالة الاشتراك</label>
+            <select id="editSubscriptionStatus" onchange="toggleDateFields()">
+                <option value="none">غير مشترك</option>
+                <option value="pending">قيد المعالجة</option>
+                <option value="approved">مشترك</option>
+                <option value="rejected">مرفوض</option>
+            </select>
+        </div>
+        <div class="form-group" id="subscriptionDateGroup" style="display:none;">
+            <label>تاريخ بدء الاشتراك</label>
+            <input type="date" id="editSubscriptionStartDate">
+        </div>
+        <div class="form-group" id="subscriptionEndDateGroup" style="display:none;">
+            <label>تاريخ نهاية الاشتراك</label>
+            <input type="date" id="editSubscriptionEndDate">
+        </div>
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="btn btn-success" onclick="saveUserEdit()" style="flex:1;">
+                <i class="fas fa-save"></i> حفظ
+            </button>
+            <button class="btn btn-secondary" onclick="closeEditUserModal()" style="flex:1;">
+                <i class="fas fa-times"></i> إلغاء
+            </button>
         </div>
     </div>
 </div>
 
 <script type="module">
-    // =====================================================
-    // 1. استيراد Firebase (الإصدار 12.17.1)
-    // =====================================================
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-    import { getDatabase, ref, onValue, push, set, remove } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
+    import { getDatabase, ref, onValue, push, set, remove, get } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 
-    // =====================================================
-    // 2. إعدادات Firebase الجديدة
-    // =====================================================
     const firebaseConfig = {
         apiKey: "AIzaSyDnNv3tekrHervtMjYk2nv0vluN83dTOrw",
         authDomain: "xraystop-d13d3.firebaseapp.com",
@@ -258,110 +659,109 @@
         projectId: "xraystop-d13d3",
         storageBucket: "xraystop-d13d3.firebasestorage.app",
         messagingSenderId: "597257727564",
-        appId: "1:597257727564:web:198421df2f0b5206b04ee9",
-        measurementId: "G-QV6RQ3JR3Y"
+        appId: "1:597257727564:web:198421df2f0b5206b04ee9"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const auth = getAuth(app);
 
-    // =====================================================
-    // 3. إعدادات Cloudinary (نفس الإعدادات السابقة)
-    // =====================================================
-    const USE_CLOUDINARY = true;
+    const ADMIN_EMAIL = 'mojtabakareem77@gmail.com';
     const CLOUDINARY_CLOUD_NAME = "fl3npkvv";
     const CLOUDINARY_UPLOAD_PRESET = "Postion";
 
-    // =====================================================
-    // 4. عناصر DOM
-    // =====================================================
-    const form = document.getElementById('uploadForm');
-    const formTitle = document.getElementById('formTitle');
-    const submitBtn = document.getElementById('submitBtn');
-    const submitText = document.getElementById('submitText');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const editId = document.getElementById('editId');
-    const posName = document.getElementById('posName');
-    const regionSelect = document.getElementById('regionSelect');
-    const kvp = document.getElementById('kvp');
-    const mas = document.getElementById('mas');
-    const center = document.getElementById('center');
-    const purpose = document.getElementById('purpose');
-    const statusMsg = document.getElementById('statusMessage');
-    const positionsList = document.getElementById('positionsList');
-    const loadingSpinner = document.getElementById('loadingSpinner');
-    const totalCount = document.getElementById('totalCount');
-    const deleteModal = document.getElementById('deleteModal');
-    const deleteItemName = document.getElementById('deleteItemName');
-    const confirmDelete = document.getElementById('confirmDelete');
-    const cancelDelete = document.getElementById('cancelDelete');
-    const searchFilter = document.getElementById('searchFilter');
-    const regionFilter = document.getElementById('regionFilter');
-    const filterStats = document.getElementById('filterStats');
-    const filterCount = document.getElementById('filterCount');
-    const clearFilterBtn = document.getElementById('clearFilterBtn');
-    
-    // صناديق الرفع
-    const realUploadBox = document.getElementById('realUploadBox');
-    const realFileInput = document.getElementById('realFileInput');
-    const realPreview = document.getElementById('realPreview');
-    const realFileName = document.getElementById('realFileName');
-    const removeRealImage = document.getElementById('removeRealImage');
-    const xrayUploadBox = document.getElementById('xrayUploadBox');
-    const xrayFileInput = document.getElementById('xrayFileInput');
-    const xrayPreview = document.getElementById('xrayPreview');
-    const xrayFileName = document.getElementById('xrayFileName');
-    const removeXrayImage = document.getElementById('removeXrayImage');
-
-    // =====================================================
-    // 5. متغيرات الحالة
-    // =====================================================
-    let allData = [];
-    let filteredData = [];
-    let deleteTargetId = null;
     let realFile = null;
     let xrayFile = null;
+    let allUsers = {};
+    let allPositions = {};
+    let editingPositionId = null;
     let existingRealUrl = '';
     let existingXrayUrl = '';
 
-    // =====================================================
-    // 6. دوال رفع الصور (نفس السابق)
-    // =====================================================
-    function setupUploadBox(box, fileInput, preview, fileNameDisplay, removeBtn, setFile, setPreview) {
-        box.addEventListener('dragover', (e) => { e.preventDefault(); box.classList.add('dragover'); });
-        box.addEventListener('dragleave', () => { box.classList.remove('dragover'); });
-        box.addEventListener('drop', (e) => {
-            e.preventDefault();
-            box.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                const file = files[0];
-                if (file.type.startsWith('image/')) {
-                    setFile(file);
-                    setPreview(file);
-                    box.classList.add('has-image');
-                    removeBtn.style.display = 'flex';
-                    fileNameDisplay.textContent = file.name;
-                }
+    const adminLoginScreen = document.getElementById('adminLoginScreen');
+    const mainContent = document.getElementById('mainContent');
+    const adminEmail = document.getElementById('adminEmail');
+    const adminPassword = document.getElementById('adminPassword');
+    const adminLoginBtn = document.getElementById('adminLoginBtn');
+    const adminLoginError = document.getElementById('adminLoginError');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    // تسجيل الدخول
+    adminLoginBtn.addEventListener('click', async () => {
+        const email = adminEmail.value.trim();
+        const password = adminPassword.value;
+        adminLoginError.style.display = 'none';
+        
+        if (!email || !password) {
+            adminLoginError.textContent = 'يرجى إدخال البريد الإلكتروني وكلمة المرور';
+            adminLoginError.style.display = 'block';
+            return;
+        }
+        
+        if (email !== ADMIN_EMAIL) {
+            adminLoginError.textContent = 'هذا الحساب ليس لديه صلاحيات الأدمن';
+            adminLoginError.style.display = 'block';
+            return;
+        }
+        
+        adminLoginBtn.disabled = true;
+        adminLoginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحقق...';
+        
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            adminLoginError.textContent = error.code === 'auth/wrong-password' ? 'كلمة المرور غير صحيحة' : 'خطأ في تسجيل الدخول';
+            adminLoginError.style.display = 'block';
+            adminLoginBtn.disabled = false;
+            adminLoginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> تسجيل الدخول';
+        }
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+        await signOut(auth);
+    });
+
+    // التبديل بين التبويبات
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            const tabName = tab.dataset.tab;
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            if (tabName === 'users') loadUsers();
+        });
+    });
+
+    // رفع الصور
+    function setupUploadBox(box, fileInput, preview, removeBtn, setFile) {
+        box.addEventListener('click', (e) => {
+            if (e.target !== removeBtn && !removeBtn.contains(e.target)) {
+                fileInput.click();
             }
         });
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
                 setFile(file);
-                setPreview(file);
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    preview.src = event.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
                 box.classList.add('has-image');
                 removeBtn.style.display = 'flex';
-                fileNameDisplay.textContent = file.name;
             }
         });
         removeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             setFile(null);
-            setPreview(null);
+            preview.style.display = 'none';
+            preview.src = '';
             box.classList.remove('has-image');
             removeBtn.style.display = 'none';
-            fileNameDisplay.textContent = '';
             fileInput.value = '';
             if (box.id === 'realUploadBox') existingRealUrl = '';
             else existingXrayUrl = '';
@@ -369,340 +769,483 @@
     }
 
     setupUploadBox(
-        realUploadBox, realFileInput, realPreview, realFileName, removeRealImage,
-        (f) => { realFile = f; },
-        (f) => {
-            if (f) {
-                const reader = new FileReader();
-                reader.onload = (e) => { realPreview.src = e.target.result; realPreview.style.display = 'block'; };
-                reader.readAsDataURL(f);
-            } else { realPreview.style.display = 'none'; realPreview.src = ''; }
-        }
-    );
-    setupUploadBox(
-        xrayUploadBox, xrayFileInput, xrayPreview, xrayFileName, removeXrayImage,
-        (f) => { xrayFile = f; },
-        (f) => {
-            if (f) {
-                const reader = new FileReader();
-                reader.onload = (e) => { xrayPreview.src = e.target.result; xrayPreview.style.display = 'block'; };
-                reader.readAsDataURL(f);
-            } else { xrayPreview.style.display = 'none'; xrayPreview.src = ''; }
-        }
+        document.getElementById('realUploadBox'),
+        document.getElementById('realFileInput'),
+        document.getElementById('realPreview'),
+        document.getElementById('removeRealImage'),
+        (f) => { realFile = f; }
     );
 
-    // =====================================================
-    // 7. دوال رفع الصور (Cloudinary أو Base64)
-    // =====================================================
+    setupUploadBox(
+        document.getElementById('xrayUploadBox'),
+        document.getElementById('xrayFileInput'),
+        document.getElementById('xrayPreview'),
+        document.getElementById('removeXrayImage'),
+        (f) => { xrayFile = f; }
+    );
+
     async function uploadToCloudinary(file) {
-        if (!file) return null;
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
         formData.append('cloud_name', CLOUDINARY_CLOUD_NAME);
-        formData.append('folder', 'positions');
-        try {
-            const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
-                method: 'POST',
-                body: formData
-            });
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.message || 'فشل رفع الصورة إلى Cloudinary');
-            }
-            const data = await response.json();
-            return data.secure_url;
-        } catch (error) {
-            console.error('خطأ في رفع الصورة:', error);
-            throw error;
-        }
-    }
-
-    function fileToBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = (error) => reject(error);
-            reader.readAsDataURL(file);
+        
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+            method: 'POST',
+            body: formData
         });
+        const data = await response.json();
+        return data.secure_url;
     }
 
-    async function uploadImages(realFile, xrayFile, existingRealUrl, existingXrayUrl) {
-        let realImgUrl = existingRealUrl;
-        let xrayImgUrl = existingXrayUrl;
-
-        if (realFile) {
-            if (USE_CLOUDINARY) {
-                realImgUrl = await uploadToCloudinary(realFile);
-            } else {
-                realImgUrl = await fileToBase64(realFile);
-            }
-            if (!realImgUrl) throw new Error('فشل في الحصول على رابط الصورة الحقيقية');
-        }
-        if (xrayFile) {
-            if (USE_CLOUDINARY) {
-                xrayImgUrl = await uploadToCloudinary(xrayFile);
-            } else {
-                xrayImgUrl = await fileToBase64(xrayFile);
-            }
-            if (!xrayImgUrl) throw new Error('فشل في الحصول على رابط الصورة الشعاعية');
-        }
-        return { realImgUrl, xrayImgUrl };
-    }
-
-    // =====================================================
-    // 8. دوال عرض الرسائل
-    // =====================================================
-    function showStatus(message, type = 'info', duration = 5000) {
+    function showStatus(message, type) {
+        const statusMsg = document.getElementById('statusMessage');
         statusMsg.className = `status-message show ${type}`;
-        statusMsg.innerHTML = message;
-        if (duration > 0 && type !== 'info') {
-            setTimeout(() => { statusMsg.className = 'status-message'; }, duration);
-        }
+        statusMsg.textContent = message;
+        setTimeout(() => { statusMsg.className = 'status-message'; }, 3000);
     }
 
-    // =====================================================
-    // 9. تحميل البيانات من Firebase (مع رسائل تصحيح)
-    // =====================================================
-    function loadData() {
-        loadingSpinner.classList.add('show');
-        positionsList.innerHTML = '';
-        showStatus('⏳ جاري تحميل البيانات من Firebase...', 'info', 0);
-
-        const dataRef = ref(db, 'positions');
-        onValue(dataRef, (snapshot) => {
-            loadingSpinner.classList.remove('show');
-            const data = snapshot.val();
-            console.log('📦 البيانات الخام المستلمة من Firebase:', data);
-
-            if (data) {
-                // تحويل الكائن إلى مصفوفة مع إضافة id
-                allData = Object.keys(data).map(key => {
-                    const item = data[key];
-                    // التأكد من وجود region، وإلا نضع قيمة افتراضية
-                    if (!item.region) {
-                        console.warn(`⚠️ الوضعية "${item.name || 'بدون اسم'}" ليس لها حقل region، تم تعيين 'OTHER' افتراضياً.`);
-                        item.region = 'OTHER';
-                    }
-                    return { id: key, ...item };
-                });
-                console.log(`✅ تم تحميل ${allData.length} وضعية بنجاح.`);
-                showStatus(`✅ تم تحميل ${allData.length} وضعية.`, 'success', 3000);
-            } else {
-                allData = [];
-                console.warn('⚠️ لا توجد بيانات في Firebase (positions).');
-                showStatus('⚠️ لا توجد بيانات حالياً. أضف وضعيات جديدة.', 'error');
-            }
-            applyFilters();
-        }, (error) => {
-            loadingSpinner.classList.remove('show');
-            console.error('❌ خطأ في قراءة البيانات:', error);
-            showStatus(`❌ فشل تحميل البيانات: ${error.message}`, 'error');
-        });
-    }
-
-    // =====================================================
-    // 10. التصفية والعرض
-    // =====================================================
-    function applyFilters() {
-        const searchTerm = searchFilter.value.trim().toLowerCase();
-        const regionTerm = regionFilter.value;
-        filteredData = allData.filter(pos => {
-            const nameMatch = !searchTerm || (pos.name && pos.name.toLowerCase().includes(searchTerm));
-            const regionMatch = regionTerm === 'all' || pos.region === regionTerm;
-            return nameMatch && regionMatch;
-        });
-        filteredData.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-        updateStats();
-        renderPositions(filteredData);
-        clearFilterBtn.disabled = (searchTerm === '' && regionTerm === 'all');
-    }
-
-    function updateStats() {
-        totalCount.textContent = `(${allData.length})`;
-        filterCount.textContent = filteredData.length;
-        const regionName = regionFilter.value === 'all' ? 'جميع المناطق' : regionFilter.value;
-        const searchTerm = searchFilter.value.trim();
-        filterStats.textContent = searchTerm ? `نتائج البحث عن "${searchTerm}" في ${regionName}` : `عرض ${regionName}`;
-    }
-
-    function renderPositions(positions) {
-        positionsList.innerHTML = '';
-        if (positions.length === 0) {
-            positionsList.innerHTML = `<div class="empty-state-admin"><i class="fas fa-inbox"></i><p>لا توجد وضعيات لعرضها</p></div>`;
-            return;
-        }
-        positions.forEach((pos, index) => {
-            const div = document.createElement('div');
-            div.className = 'position-item-admin';
-            div.innerHTML = `
-                <div class="pos-info">
-                    <div class="pos-icon">${index + 1}</div>
-                    <div class="pos-details">
-                        <div class="pos-name">${pos.name || 'بدون اسم'}</div>
-                        <div class="pos-region"><i class="fas fa-map-marker-alt"></i> ${pos.region || 'غير محدد'}</div>
-                    </div>
-                </div>
-                <div class="pos-actions">
-                    <button class="btn btn-secondary btn-sm edit-btn" data-id="${pos.id}"><i class="fas fa-edit"></i> تعديل</button>
-                    <button class="btn btn-danger btn-sm delete-btn" data-id="${pos.id}"><i class="fas fa-trash"></i> حذف</button>
-                </div>
-            `;
-            positionsList.appendChild(div);
-        });
-        // إضافة مستمعي الأحداث للأزرار
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const pos = allData.find(p => p.id === btn.dataset.id);
-                if (pos) editPosition(pos);
-            });
-        });
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const pos = allData.find(p => p.id === btn.dataset.id);
-                if (pos) showDeleteModal(pos);
-            });
-        });
-    }
-
-    // =====================================================
-    // 11. التعديل والحذف
-    // =====================================================
-    function editPosition(pos) {
-        formTitle.innerHTML = '<i class="fas fa-edit"></i> تعديل الوضعية';
-        submitText.textContent = 'تحديث الوضعية';
-        submitBtn.className = 'btn btn-success';
-        cancelBtn.style.display = 'flex';
-        editId.value = pos.id;
-        posName.value = pos.name || '';
-        regionSelect.value = pos.region || '';
-        kvp.value = pos.kvp || '';
-        mas.value = pos.mas || '';
-        center.value = pos.center || '';
-        purpose.value = pos.purpose || '';
-        if (pos.realImg) {
-            existingRealUrl = pos.realImg;
-            realPreview.src = pos.realImg;
-            realPreview.style.display = 'block';
-            realUploadBox.classList.add('has-image');
-            removeRealImage.style.display = 'flex';
-            realFileName.textContent = 'الصورة الحالية';
-        }
-        if (pos.xrayImg) {
-            existingXrayUrl = pos.xrayImg;
-            xrayPreview.src = pos.xrayImg;
-            xrayPreview.style.display = 'block';
-            xrayUploadBox.classList.add('has-image');
-            removeXrayImage.style.display = 'flex';
-            xrayFileName.textContent = 'الصورة الحالية';
-        }
-        form.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function cancelEdit() {
-        formTitle.innerHTML = '<i class="fas fa-plus-circle"></i> إضافة وضعية جديدة';
-        submitText.textContent = 'إضافة الوضعية';
-        submitBtn.className = 'btn btn-primary';
-        cancelBtn.style.display = 'none';
-        editId.value = '';
-        form.reset();
-        realFile = null; xrayFile = null;
-        existingRealUrl = ''; existingXrayUrl = '';
-        realPreview.style.display = 'none'; xrayPreview.style.display = 'none';
-        realUploadBox.classList.remove('has-image'); xrayUploadBox.classList.remove('has-image');
-        removeRealImage.style.display = 'none'; removeXrayImage.style.display = 'none';
-        showStatus('', 'info');
-    }
-
-    function showDeleteModal(pos) {
-        deleteTargetId = pos.id;
-        deleteItemName.textContent = pos.name || 'بدون اسم';
-        deleteModal.classList.add('show');
-    }
-
-    async function deletePosition(id) {
-        try {
-            await remove(ref(db, `positions/${id}`));
-            showStatus('✅ تم حذف الوضعية بنجاح', 'success');
-            deleteModal.classList.remove('show');
-            deleteTargetId = null;
-        } catch (error) {
-            showStatus('❌ حدث خطأ أثناء الحذف: ' + error.message, 'error');
-        }
-    }
-
-    // =====================================================
-    // 12. إرسال النموذج (حفظ البيانات)
-    // =====================================================
-    form.addEventListener('submit', async (e) => {
+    // حفظ الوضعية (إضافة أو تعديل)
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        
+        const name = document.getElementById('posName').value.trim();
+        const region = document.getElementById('regionSelect').value;
+        
+        if (!name || !region) {
+            showStatus('يرجى ملء جميع الحقول المطلوبة', 'error');
+            return;
+        }
+        
         if (!realFile && !existingRealUrl) {
-            showStatus('⚠️ يرجى رفع الصورة الحقيقية.', 'error');
+            showStatus('يرجى رفع الصورة الحقيقية', 'error');
             return;
         }
+        
         if (!xrayFile && !existingXrayUrl) {
-            showStatus('⚠️ يرجى رفع الصورة الشعاعية.', 'error');
+            showStatus('يرجى رفع الصورة الشعاعية', 'error');
             return;
         }
-
-        const id = editId.value;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الرفع والحفظ ...';
-        showStatus('📤 جاري معالجة الصور...', 'info', 0);
-
+        
+        showStatus('جاري الحفظ...', 'info');
+        
         try {
-            const { realImgUrl, xrayImgUrl } = await uploadImages(realFile, xrayFile, existingRealUrl, existingXrayUrl);
-
+            let realImgUrl = existingRealUrl;
+            let xrayImgUrl = existingXrayUrl;
+            
+            if (realFile) realImgUrl = await uploadToCloudinary(realFile);
+            if (xrayFile) xrayImgUrl = await uploadToCloudinary(xrayFile);
+            
             const data = {
-                name: posName.value.trim(),
-                region: regionSelect.value,
+                name: name,
+                region: region,
                 realImg: realImgUrl,
                 xrayImg: xrayImgUrl,
-                kvp: kvp.value.trim(),
-                mas: mas.value.trim(),
-                center: center.value.trim(),
-                purpose: purpose.value.trim(),
+                kvp: document.getElementById('kvp').value,
+                mas: document.getElementById('mas').value,
+                center: document.getElementById('center').value,
+                purpose: document.getElementById('purpose').value,
                 timestamp: Date.now()
             };
-
-            if (id) {
-                await set(ref(db, `positions/${id}`), data);
-                showStatus('✅ تم تحديث الوضعية بنجاح', 'success');
-                cancelEdit();
+            
+            if (editingPositionId) {
+                await set(ref(db, `positions/${editingPositionId}`), data);
+                showStatus('تم تحديث الوضعية بنجاح', 'success');
             } else {
                 await push(ref(db, 'positions'), data);
-                showStatus('✅ تم إضافة الوضعية بنجاح', 'success');
-                form.reset();
-                realFile = null; xrayFile = null;
-                existingRealUrl = ''; existingXrayUrl = '';
-                realPreview.style.display = 'none'; xrayPreview.style.display = 'none';
-                realUploadBox.classList.remove('has-image'); xrayUploadBox.classList.remove('has-image');
-                removeRealImage.style.display = 'none'; removeXrayImage.style.display = 'none';
+                showStatus('تمت الإضافة بنجاح', 'success');
             }
+            
+            cancelEdit();
+            document.getElementById('uploadForm').reset();
+            
         } catch (error) {
-            console.error('تفاصيل الخطأ:', error);
-            showStatus(`❌ حدث خطأ: ${error.message || 'غير معروف'}`, 'error');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = `<i class="fas fa-save"></i> ${id ? 'تحديث الوضعية' : 'إضافة الوضعية'}`;
+            showStatus('خطأ: ' + error.message, 'error');
         }
     });
 
-    // =====================================================
-    // 13. الأحداث
-    // =====================================================
-    cancelBtn.addEventListener('click', cancelEdit);
-    confirmDelete.addEventListener('click', () => { if (deleteTargetId) deletePosition(deleteTargetId); });
-    cancelDelete.addEventListener('click', () => { deleteModal.classList.remove('show'); deleteTargetId = null; });
-    deleteModal.addEventListener('click', (e) => { if (e.target === deleteModal) { deleteModal.classList.remove('show'); deleteTargetId = null; } });
-    searchFilter.addEventListener('input', applyFilters);
-    regionFilter.addEventListener('change', applyFilters);
-    clearFilterBtn.addEventListener('click', () => { searchFilter.value = ''; regionFilter.value = 'all'; applyFilters(); });
+    // إلغاء التعديل
+    window.cancelEdit = function() {
+        editingPositionId = null;
+        document.getElementById('editingPositionId').value = '';
+        realFile = null;
+        xrayFile = null;
+        existingRealUrl = '';
+        existingXrayUrl = '';
+        document.getElementById('realPreview').style.display = 'none';
+        document.getElementById('xrayPreview').style.display = 'none';
+        document.getElementById('realUploadBox').classList.remove('has-image');
+        document.getElementById('xrayUploadBox').classList.remove('has-image');
+        document.getElementById('removeRealImage').style.display = 'none';
+        document.getElementById('removeXrayImage').style.display = 'none';
+        document.getElementById('submitText').textContent = 'حفظ';
+        document.getElementById('formTitle').innerHTML = '<i class="fas fa-plus-circle"></i> إضافة وضعية جديدة';
+        document.getElementById('cancelEditBtn').style.display = 'none';
+    };
 
-    // =====================================================
-    // 14. بدء التطبيق
-    // =====================================================
-    loadData();
+    // تعديل وضعية
+    window.editPosition = function(id) {
+        const pos = allPositions[id];
+        if (!pos) return;
+        
+        editingPositionId = id;
+        document.getElementById('editingPositionId').value = id;
+        
+        document.getElementById('posName').value = pos.name || '';
+        document.getElementById('regionSelect').value = pos.region || '';
+        document.getElementById('kvp').value = pos.kvp || '';
+        document.getElementById('mas').value = pos.mas || '';
+        document.getElementById('center').value = pos.center || '';
+        document.getElementById('purpose').value = pos.purpose || '';
+        
+        if (pos.realImg) {
+            existingRealUrl = pos.realImg;
+            document.getElementById('realPreview').src = pos.realImg;
+            document.getElementById('realPreview').style.display = 'block';
+            document.getElementById('realUploadBox').classList.add('has-image');
+            document.getElementById('removeRealImage').style.display = 'flex';
+        }
+        if (pos.xrayImg) {
+            existingXrayUrl = pos.xrayImg;
+            document.getElementById('xrayPreview').src = pos.xrayImg;
+            document.getElementById('xrayPreview').style.display = 'block';
+            document.getElementById('xrayUploadBox').classList.add('has-image');
+            document.getElementById('removeXrayImage').style.display = 'flex';
+        }
+        
+        document.getElementById('submitText').textContent = 'تحديث';
+        document.getElementById('formTitle').innerHTML = '<i class="fas fa-edit"></i> تعديل الوضعية';
+        document.getElementById('cancelEditBtn').style.display = 'flex';
+        
+        document.getElementById('uploadForm').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // تحميل الوضعيات مع التصنيف
+    function loadPositions() {
+        const positionsList = document.getElementById('positionsList');
+        positionsList.innerHTML = '<div class="loading-spinner show"><i class="fas fa-spinner"></i></div>';
+        
+        onValue(ref(db, 'positions'), (snapshot) => {
+            const data = snapshot.val();
+            allPositions = data || {};
+            renderCategorizedPositions();
+        });
+    }
+
+    // عرض الوضعيات مصنفة
+    function renderCategorizedPositions() {
+        const positionsList = document.getElementById('positionsList');
+        const selectedCategory = document.getElementById('categoryFilter').value;
+        const searchTerm = document.getElementById('positionSearch').value.toLowerCase();
+        
+        const categorized = {};
+        Object.keys(allPositions).forEach(key => {
+            const pos = allPositions[key];
+            const region = pos.region || 'OTHER';
+            
+            if (selectedCategory !== 'all' && region !== selectedCategory) return;
+            if (searchTerm && pos.name && !pos.name.toLowerCase().includes(searchTerm)) return;
+            
+            if (!categorized[region]) categorized[region] = [];
+            categorized[region].push({ id: key, ...pos });
+        });
+        
+        positionsList.innerHTML = '';
+        
+        const regions = Object.keys(categorized).sort();
+        
+        if (regions.length === 0) {
+            positionsList.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد وضعيات</p></div>';
+            return;
+        }
+        
+        regions.forEach(region => {
+            const positions = categorized[region];
+            
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'category-section';
+            categoryDiv.innerHTML = `
+                <div class="category-header">
+                    <i class="fas fa-folder"></i>
+                    <span>${region}</span>
+                    <span class="count-badge">${positions.length} وضعية</span>
+                </div>
+                <div class="category-positions" id="category-${region.replace(/\s/g, '-')}">
+                </div>
+            `;
+            positionsList.appendChild(categoryDiv);
+            
+            const categoryContainer = document.getElementById(`category-${region.replace(/\s/g, '-')}`);
+            positions.forEach((pos, index) => {
+                const div = document.createElement('div');
+                div.className = 'position-item-admin';
+                div.innerHTML = `
+                    <div>
+                        <div style="font-weight:700;">${index + 1}. ${pos.name || 'بدون اسم'}</div>
+                        <div style="font-size:0.75rem;color:#7f8c8d;">${pos.region || ''}</div>
+                    </div>
+                    <div class="position-actions">
+                        <button class="btn btn-primary btn-sm" onclick="editPosition('${pos.id}')">
+                            <i class="fas fa-edit"></i> تعديل
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deletePosition('${pos.id}')">
+                            <i class="fas fa-trash"></i> حذف
+                        </button>
+                    </div>
+                `;
+                categoryContainer.appendChild(div);
+            });
+        });
+    }
+
+    // التصفية والبحث
+    document.getElementById('categoryFilter').addEventListener('change', renderCategorizedPositions);
+    document.getElementById('positionSearch').addEventListener('input', renderCategorizedPositions);
+
+    window.deletePosition = async function(id) {
+        if (confirm('حذف هذه الوضعية؟')) {
+            try {
+                await remove(ref(db, `positions/${id}`));
+                alert('تم الحذف');
+            } catch (error) {
+                alert('خطأ: ' + error.message);
+            }
+        }
+    };
+
+    // تحميل المستخدمين مع عرض معلومات الاشتراك
+    function loadUsers(filter = '') {
+        const usersList = document.getElementById('usersList');
+        usersList.innerHTML = '<div class="loading-spinner show"><i class="fas fa-spinner"></i></div>';
+        
+        get(ref(db, 'users')).then((snapshot) => {
+            usersList.innerHTML = '';
+            
+            if (snapshot.exists()) {
+                allUsers = snapshot.val();
+                const filteredUsers = Object.keys(allUsers).filter(key => {
+                    const user = allUsers[key];
+                    if (!filter) return true;
+                    const searchTerm = filter.toLowerCase();
+                    return (user.username && user.username.toLowerCase().includes(searchTerm)) || 
+                           (user.email && user.email.toLowerCase().includes(searchTerm));
+                });
+                
+                if (filteredUsers.length === 0) {
+                    usersList.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>لا يوجد مستخدمين</p></div>';
+                    return;
+                }
+                
+                filteredUsers.forEach(key => {
+                    const user = allUsers[key];
+                    const status = user.subscription?.status || 'none';
+                    const statusText = status === 'approved' ? 'مشترك' : status === 'pending' ? 'قيد المعالجة' : status === 'rejected' ? 'مرفوض' : 'غير مشترك';
+                    const statusClass = status === 'approved' ? 'status-approved' : status === 'pending' ? 'status-pending' : status === 'rejected' ? 'status-rejected' : 'status-none';
+                    
+                    let subscriptionInfoHtml = '';
+                    if (status === 'approved' && user.subscription) {
+                        const startDate = user.subscription.startDate ? new Date(user.subscription.startDate).toLocaleDateString('ar-IQ') : 'غير محدد';
+                        const endDate = user.subscription.endDate ? new Date(user.subscription.endDate).toLocaleDateString('ar-IQ') : 'غير محدد';
+                        const price = user.subscription.price || '10,000 دينار عراقي';
+                        
+                        subscriptionInfoHtml = `
+                            <div class="subscription-info">
+                                <div><i class="fas fa-calendar-check"></i> تاريخ البدء: ${startDate}</div>
+                                <div><i class="fas fa-calendar-times"></i> تاريخ الانتهاء: ${endDate}</div>
+                                <div><i class="fas fa-money-bill"></i> السعر: ${price}</div>
+                            </div>
+                        `;
+                    }
+                    
+                    const div = document.createElement('div');
+                    div.className = 'user-card';
+                    div.innerHTML = `
+                        <div class="user-header">
+                            <div class="user-avatar">${(user.username || user.email || '?').charAt(0).toUpperCase()}</div>
+                            <div class="user-info-details">
+                                <div class="user-name">${user.username || 'بدون اسم'}</div>
+                                <div class="user-email">${user.email || 'بدون بريد'}</div>
+                            </div>
+                            <span class="user-status ${statusClass}">${statusText}</span>
+                        </div>
+                        ${subscriptionInfoHtml}
+                        <div class="user-actions">
+                            <button class="btn btn-primary btn-sm" onclick="openEditUser('${key}')">
+                                <i class="fas fa-edit"></i> تعديل
+                            </button>
+                            <button class="btn btn-success btn-sm" onclick="activateSubscription('${key}')">
+                                <i class="fas fa-check"></i> تفعيل سنة
+                            </button>
+                            <button class="btn btn-warning btn-sm" onclick="cancelSubscription('${key}')">
+                                <i class="fas fa-ban"></i> إلغاء
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteUser('${key}')">
+                                <i class="fas fa-trash"></i> حذف
+                            </button>
+                        </div>
+                    `;
+                    usersList.appendChild(div);
+                });
+            } else {
+                usersList.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>لا يوجد مستخدمين مسجلين</p></div>';
+            }
+        }).catch((error) => {
+            usersList.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>خطأ في التحميل</p></div>';
+        });
+    }
+
+    // البحث عن مستخدم
+    document.getElementById('userSearchInput').addEventListener('input', function(e) {
+        loadUsers(e.target.value.trim());
+    });
+
+    // فتح نافذة التعديل
+    window.openEditUser = function(userId) {
+        const user = allUsers[userId];
+        if (!user) return;
+        
+        document.getElementById('editUserId').value = userId;
+        document.getElementById('editUsername').value = user.username || '';
+        document.getElementById('editUserEmail').value = user.email || '';
+        document.getElementById('editSubscriptionStatus').value = user.subscription?.status || 'none';
+        
+        const status = user.subscription?.status;
+        if (status === 'approved') {
+            document.getElementById('subscriptionDateGroup').style.display = 'block';
+            document.getElementById('subscriptionEndDateGroup').style.display = 'block';
+            if (user.subscription.startDate) {
+                const startDate = new Date(user.subscription.startDate);
+                document.getElementById('editSubscriptionStartDate').value = startDate.toISOString().split('T')[0];
+            }
+            if (user.subscription.endDate) {
+                const endDate = new Date(user.subscription.endDate);
+                document.getElementById('editSubscriptionEndDate').value = endDate.toISOString().split('T')[0];
+            }
+        } else {
+            document.getElementById('subscriptionDateGroup').style.display = 'none';
+            document.getElementById('subscriptionEndDateGroup').style.display = 'none';
+        }
+        
+        document.getElementById('editUserModal').classList.add('show');
+    };
+
+    window.closeEditUserModal = function() {
+        document.getElementById('editUserModal').classList.remove('show');
+    };
+
+    window.toggleDateFields = function() {
+        const status = document.getElementById('editSubscriptionStatus').value;
+        if (status === 'approved') {
+            document.getElementById('subscriptionDateGroup').style.display = 'block';
+            document.getElementById('subscriptionEndDateGroup').style.display = 'block';
+        } else {
+            document.getElementById('subscriptionDateGroup').style.display = 'none';
+            document.getElementById('subscriptionEndDateGroup').style.display = 'none';
+        }
+    };
+
+    window.saveUserEdit = async function() {
+        const userId = document.getElementById('editUserId').value;
+        const username = document.getElementById('editUsername').value.trim();
+        const email = document.getElementById('editUserEmail').value.trim();
+        const status = document.getElementById('editSubscriptionStatus').value;
+        
+        if (!username || !email) {
+            alert('يرجى ملء جميع الحقول');
+            return;
+        }
+        
+        try {
+            const user = allUsers[userId];
+            const updates = {
+                username: username,
+                email: email
+            };
+            
+            if (user.subscription) {
+                updates.subscription = { ...user.subscription, status: status };
+            } else {
+                updates.subscription = { status: status };
+            }
+            
+            if (status === 'approved') {
+                const startDate = document.getElementById('editSubscriptionStartDate').value;
+                const endDate = document.getElementById('editSubscriptionEndDate').value;
+                if (startDate) updates.subscription.startDate = new Date(startDate).toISOString();
+                if (endDate) updates.subscription.endDate = new Date(endDate).toISOString();
+                updates.subscription.price = '10,000 دينار عراقي';
+            }
+            
+            await set(ref(db, `users/${userId}`), updates);
+            alert('✅ تم حفظ التعديلات');
+            closeEditUserModal();
+            loadUsers();
+        } catch (error) {
+            alert('❌ خطأ: ' + error.message);
+        }
+    };
+
+    window.activateSubscription = async function(userId) {
+        if (confirm('تفعيل الاشتراك لمدة سنة كاملة؟')) {
+            try {
+                const startDate = new Date();
+                const endDate = new Date();
+                endDate.setFullYear(endDate.getFullYear() + 1);
+                
+                await set(ref(db, `users/${userId}/subscription`), {
+                    status: 'approved',
+                    startDate: startDate.toISOString(),
+                    endDate: endDate.toISOString(),
+                    price: '10,000 دينار عراقي',
+                    activatedAt: new Date().toISOString()
+                });
+                alert('✅ تم تفعيل الاشتراك لمدة سنة');
+                loadUsers();
+            } catch (error) {
+                alert('❌ خطأ: ' + error.message);
+            }
+        }
+    };
+
+    window.cancelSubscription = async function(userId) {
+        if (confirm('إلغاء اشتراك هذا المستخدم؟')) {
+            try {
+                await set(ref(db, `users/${userId}/subscription/status`), 'none');
+                await set(ref(db, `users/${userId}/subscription/cancelledAt`), new Date().toISOString());
+                alert('✅ تم إلغاء الاشتراك');
+                loadUsers();
+            } catch (error) {
+                alert('❌ خطأ: ' + error.message);
+            }
+        }
+    };
+
+    window.deleteUser = async function(userId) {
+        if (confirm('هل أنت متأكد من حذف هذا المستخدم؟ لن يتمكن من تسجيل الدخول مرة أخرى!')) {
+            if (confirm('تأكيد نهائي: سيتم حذف المستخدم نهائياً!')) {
+                try {
+                    await remove(ref(db, `users/${userId}`));
+                    alert('✅ تم حذف المستخدم');
+                    loadUsers();
+                } catch (error) {
+                    alert('❌ خطأ: ' + error.message);
+                }
+            }
+        }
+    };
+
+    // مراقبة حالة المستخدم
+    onAuthStateChanged(auth, (user) => {
+        if (user && user.email === ADMIN_EMAIL) {
+            adminLoginScreen.classList.add('hidden');
+            mainContent.classList.add('show');
+            loadPositions();
+        } else {
+            adminLoginScreen.classList.remove('hidden');
+            mainContent.classList.remove('show');
+            adminPassword.value = '';
+        }
+    });
 </script>
 
 </body>
