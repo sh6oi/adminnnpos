@@ -667,8 +667,8 @@
     const auth = getAuth(app);
 
     const ADMIN_EMAIL = 'mojtabakareem77@gmail.com';
-    const CLOUDINARY_CLOUD_NAME = "fl3npkvv";
-    const CLOUDINARY_UPLOAD_PRESET = "Postion";
+    const R2_WORKER_URL = 'https://frosty-field-ea93.mojtabakareem77.workers.dev';
+    const R2_UPLOAD_URL = 'https://frosty-field-ea93.mojtabakareem77.workers.dev/upload';
 
     let realFile = null;
     let xrayFile = null;
@@ -685,6 +685,132 @@
     const adminLoginBtn = document.getElementById('adminLoginBtn');
     const adminLoginError = document.getElementById('adminLoginError');
     const logoutBtn = document.getElementById('logoutBtn');
+
+    // ==================== دالة موحدة لتحويل روابط الصور ====================
+    function getCloudflareImageUrl(imageValue) {
+        if (!imageValue || imageValue === '') return '';
+        
+        if (imageValue.startsWith(R2_WORKER_URL)) {
+            return imageValue;
+        }
+        
+        if (imageValue.includes('res.cloudinary.com') || imageValue.includes('cloudinary.com')) {
+            try {
+                const url = new URL(imageValue);
+                const pathParts = url.pathname.split('/');
+                const fileName = pathParts[pathParts.length - 1];
+                
+                if (fileName && (fileName.includes('.') || fileName.includes('-'))) {
+                    return `${R2_WORKER_URL}/${fileName}`;
+                }
+            } catch (error) {
+                console.warn('فشل تحويل رابط Cloudinary:', error);
+            }
+        }
+        
+        if (!imageValue.startsWith('http') && !imageValue.startsWith('https')) {
+            return `${R2_WORKER_URL}/${imageValue}`;
+        }
+        
+        if (imageValue.includes('firebasestorage.googleapis.com')) {
+            try {
+                const url = new URL(imageValue);
+                const pathParts = url.pathname.split('/');
+                const fileName = pathParts[pathParts.length - 1].split('?')[0];
+                if (fileName) {
+                    return `${R2_WORKER_URL}/${fileName}`;
+                }
+            } catch (error) {
+                console.warn('فشل تحويل رابط Firebase:', error);
+            }
+        }
+        
+        return imageValue;
+    }
+
+    // ==================== دالة استخراج اسم الملف من الرابط ====================
+    function extractFileNameFromUrl(url) {
+        if (!url) return '';
+        
+        try {
+            if (url.startsWith(R2_WORKER_URL)) {
+                return url.replace(R2_WORKER_URL + '/', '');
+            }
+            
+            const urlObj = new URL(url);
+            const pathParts = urlObj.pathname.split('/');
+            return pathParts[pathParts.length - 1].split('?')[0];
+        } catch (error) {
+            return url.split('/').pop();
+        }
+    }
+
+    // ==================== رفع الصورة إلى Cloudflare R2 ====================
+    async function uploadToCloudflareR2(file) {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            console.log('Uploading to:', R2_UPLOAD_URL);
+            console.log('File:', file.name, file.type, file.size);
+            
+            const response = await fetch(R2_UPLOAD_URL, {
+                method: 'POST',
+                body: formData
+            });
+            
+            console.log('Response status:', response.status);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Upload error response:', errorText);
+                
+                try {
+                    const errorData = JSON.parse(errorText);
+                    throw new Error(errorData.error || `فشل رفع الصورة (${response.status})`);
+                } catch (parseError) {
+                    throw new Error(`فشل رفع الصورة (${response.status}): ${errorText}`);
+                }
+            }
+            
+            const data = await response.json();
+            console.log('Upload success:', data);
+            
+            if (!data.success || !data.url) {
+                throw new Error('لم يتم استلام رابط الصورة من الخادم');
+            }
+            
+            return data.url;
+        } catch (error) {
+            console.error('Upload to R2 failed:', error);
+            
+            if (error.message.includes('Failed to fetch')) {
+                throw new Error('فشل الاتصال بخادم Cloudflare R2. تأكد من أن Worker يعمل ويدعم طلبات POST إلى /upload');
+            }
+            
+            throw error;
+        }
+    }
+
+    // ==================== حذف الصورة من Cloudflare R2 ====================
+    async function deleteFromCloudflareR2(imageUrl) {
+        try {
+            const fileName = extractFileNameFromUrl(imageUrl);
+            if (!fileName) return;
+            
+            console.log('Deleting from R2:', fileName);
+            
+            const response = await fetch(`${R2_WORKER_URL}/${fileName}`, {
+                method: 'DELETE'
+            });
+            
+            if (!response.ok) {
+                console.warn('فشل حذف الصورة من Cloudflare R2:', fileName, response.status);
+            }
+        } catch (error) {
+            console.warn('خطأ في حذف الصورة:', error);
+        }
+    }
 
     // تسجيل الدخول
     adminLoginBtn.addEventListener('click', async () => {
@@ -784,20 +910,6 @@
         (f) => { xrayFile = f; }
     );
 
-    async function uploadToCloudinary(file) {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-        formData.append('cloud_name', CLOUDINARY_CLOUD_NAME);
-        
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
-            method: 'POST',
-            body: formData
-        });
-        const data = await response.json();
-        return data.secure_url;
-    }
-
     function showStatus(message, type) {
         const statusMsg = document.getElementById('statusMessage');
         statusMsg.className = `status-message show ${type}`;
@@ -833,8 +945,21 @@
             let realImgUrl = existingRealUrl;
             let xrayImgUrl = existingXrayUrl;
             
-            if (realFile) realImgUrl = await uploadToCloudinary(realFile);
-            if (xrayFile) xrayImgUrl = await uploadToCloudinary(xrayFile);
+            if (existingRealUrl) {
+                realImgUrl = getCloudflareImageUrl(existingRealUrl);
+            }
+            if (existingXrayUrl) {
+                xrayImgUrl = getCloudflareImageUrl(existingXrayUrl);
+            }
+            
+            if (realFile) {
+                showStatus('جاري رفع الصورة الحقيقية...', 'info');
+                realImgUrl = await uploadToCloudflareR2(realFile);
+            }
+            if (xrayFile) {
+                showStatus('جاري رفع الصورة الشعاعية...', 'info');
+                xrayImgUrl = await uploadToCloudflareR2(xrayFile);
+            }
             
             const data = {
                 name: name,
@@ -860,6 +985,7 @@
             document.getElementById('uploadForm').reset();
             
         } catch (error) {
+            console.error('Save error:', error);
             showStatus('خطأ: ' + error.message, 'error');
         }
     });
@@ -899,15 +1025,15 @@
         document.getElementById('purpose').value = pos.purpose || '';
         
         if (pos.realImg) {
-            existingRealUrl = pos.realImg;
-            document.getElementById('realPreview').src = pos.realImg;
+            existingRealUrl = getCloudflareImageUrl(pos.realImg);
+            document.getElementById('realPreview').src = existingRealUrl;
             document.getElementById('realPreview').style.display = 'block';
             document.getElementById('realUploadBox').classList.add('has-image');
             document.getElementById('removeRealImage').style.display = 'flex';
         }
         if (pos.xrayImg) {
-            existingXrayUrl = pos.xrayImg;
-            document.getElementById('xrayPreview').src = pos.xrayImg;
+            existingXrayUrl = getCloudflareImageUrl(pos.xrayImg);
+            document.getElementById('xrayPreview').src = existingXrayUrl;
             document.getElementById('xrayPreview').style.display = 'block';
             document.getElementById('xrayUploadBox').classList.add('has-image');
             document.getElementById('removeXrayImage').style.display = 'flex';
@@ -927,7 +1053,19 @@
         
         onValue(ref(db, 'positions'), (snapshot) => {
             const data = snapshot.val();
-            allPositions = data || {};
+            allPositions = {};
+            
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    const pos = data[key];
+                    allPositions[key] = {
+                        ...pos,
+                        realImg: getCloudflareImageUrl(pos.realImg),
+                        xrayImg: getCloudflareImageUrl(pos.xrayImg)
+                    };
+                });
+            }
+            
             renderCategorizedPositions();
         });
     }
@@ -979,10 +1117,18 @@
             positions.forEach((pos, index) => {
                 const div = document.createElement('div');
                 div.className = 'position-item-admin';
+                
+                const realImgSrc = pos.realImg ? getCloudflareImageUrl(pos.realImg) : '';
+                const xrayImgSrc = pos.xrayImg ? getCloudflareImageUrl(pos.xrayImg) : '';
+                
                 div.innerHTML = `
-                    <div>
-                        <div style="font-weight:700;">${index + 1}. ${pos.name || 'بدون اسم'}</div>
-                        <div style="font-size:0.75rem;color:#7f8c8d;">${pos.region || ''}</div>
+                    <div style="display:flex; align-items:center; gap:10px; flex:1;">
+                        ${realImgSrc ? `<img src="${realImgSrc}" alt="صورة حقيقية" style="width:40px; height:40px; object-fit:cover; border-radius:5px;" onerror="this.style.display='none'">` : ''}
+                        ${xrayImgSrc ? `<img src="${xrayImgSrc}" alt="صورة شعاعية" style="width:40px; height:40px; object-fit:cover; border-radius:5px;" onerror="this.style.display='none'">` : ''}
+                        <div>
+                            <div style="font-weight:700;">${index + 1}. ${pos.name || 'بدون اسم'}</div>
+                            <div style="font-size:0.75rem;color:#7f8c8d;">${pos.region || ''}</div>
+                        </div>
                     </div>
                     <div class="position-actions">
                         <button class="btn btn-primary btn-sm" onclick="editPosition('${pos.id}')">
@@ -1005,9 +1151,17 @@
     window.deletePosition = async function(id) {
         if (confirm('حذف هذه الوضعية؟')) {
             try {
+                const position = allPositions[id];
+                
+                if (position) {
+                    if (position.realImg) await deleteFromCloudflareR2(position.realImg);
+                    if (position.xrayImg) await deleteFromCloudflareR2(position.xrayImg);
+                }
+                
                 await remove(ref(db, `positions/${id}`));
                 alert('تم الحذف');
             } catch (error) {
+                console.error('Delete error:', error);
                 alert('خطأ: ' + error.message);
             }
         }
@@ -1057,11 +1211,19 @@
                         `;
                     }
                     
+                    let userAvatarHtml = '';
+                    if (user.avatar || user.profileImage || user.photoURL) {
+                        const avatarUrl = getCloudflareImageUrl(user.avatar || user.profileImage || user.photoURL);
+                        userAvatarHtml = `<img src="${avatarUrl}" alt="صورة المستخدم" style="width:40px; height:40px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none'">`;
+                    } else {
+                        userAvatarHtml = `<div class="user-avatar">${(user.username || user.email || '?').charAt(0).toUpperCase()}</div>`;
+                    }
+                    
                     const div = document.createElement('div');
                     div.className = 'user-card';
                     div.innerHTML = `
                         <div class="user-header">
-                            <div class="user-avatar">${(user.username || user.email || '?').charAt(0).toUpperCase()}</div>
+                            ${userAvatarHtml}
                             <div class="user-info-details">
                                 <div class="user-name">${user.username || 'بدون اسم'}</div>
                                 <div class="user-email">${user.email || 'بدون بريد'}</div>
@@ -1090,6 +1252,7 @@
                 usersList.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>لا يوجد مستخدمين مسجلين</p></div>';
             }
         }).catch((error) => {
+            console.error('Load users error:', error);
             usersList.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>خطأ في التحميل</p></div>';
         });
     }
@@ -1181,6 +1344,7 @@
             closeEditUserModal();
             loadUsers();
         } catch (error) {
+            console.error('Save user error:', error);
             alert('❌ خطأ: ' + error.message);
         }
     };
@@ -1202,6 +1366,7 @@
                 alert('✅ تم تفعيل الاشتراك لمدة سنة');
                 loadUsers();
             } catch (error) {
+                console.error('Activate subscription error:', error);
                 alert('❌ خطأ: ' + error.message);
             }
         }
@@ -1215,6 +1380,7 @@
                 alert('✅ تم إلغاء الاشتراك');
                 loadUsers();
             } catch (error) {
+                console.error('Cancel subscription error:', error);
                 alert('❌ خطأ: ' + error.message);
             }
         }
@@ -1228,6 +1394,7 @@
                     alert('✅ تم حذف المستخدم');
                     loadUsers();
                 } catch (error) {
+                    console.error('Delete user error:', error);
                     alert('❌ خطأ: ' + error.message);
                 }
             }
