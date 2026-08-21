@@ -417,6 +417,92 @@
         }
         .empty-state i { font-size: 2.5rem; color: #bdc3c7; margin-bottom: 10px; display: block; }
         
+        /* نافذة خيارات التفعيل */
+        .activation-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 10001;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .activation-modal.show { display: flex; }
+        .activation-content {
+            background: white;
+            border-radius: 16px;
+            padding: 25px 20px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        .activation-content h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        .activation-content p {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        .activation-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .activation-option-btn {
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            background: #f8f9fa;
+            color: #2c3e50;
+        }
+        .activation-option-btn:hover {
+            border-color: #667eea;
+            background: #eef0ff;
+        }
+        .activation-option-btn.three-months {
+            background: #e8f5e9;
+            border-color: #2ecc71;
+            color: #155724;
+        }
+        .activation-option-btn.three-months:hover {
+            background: #d4edda;
+        }
+        .activation-option-btn.one-year {
+            background: #e3f2fd;
+            border-color: #2196f3;
+            color: #0d47a1;
+        }
+        .activation-option-btn.one-year:hover {
+            background: #bbdefb;
+        }
+        .activation-cancel-btn {
+            margin-top: 15px;
+            padding: 10px;
+            background: #e9ecef;
+            color: #2c3e50;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            font-size: 0.9rem;
+        }
+        .activation-cancel-btn:hover {
+            background: #dee2e6;
+        }
+        
         @media (min-width: 768px) {
             body { padding: 20px; }
             .container { max-width: 900px; }
@@ -647,6 +733,25 @@
     </div>
 </div>
 
+<!-- نافذة خيارات التفعيل -->
+<div class="activation-modal" id="activationModal">
+    <div class="activation-content">
+        <h3><i class="fas fa-calendar-check"></i> اختر مدة التفعيل</h3>
+        <p>اختر المدة المناسبة لتفعيل حساب المستخدم</p>
+        <div class="activation-options">
+            <button class="activation-option-btn three-months" onclick="confirmActivation('3months')">
+                <i class="fas fa-calendar-alt"></i> تفعيل لمدة 3 أشهر
+            </button>
+            <button class="activation-option-btn one-year" onclick="confirmActivation('1year')">
+                <i class="fas fa-calendar-check"></i> تفعيل لمدة سنة
+            </button>
+        </div>
+        <button class="activation-cancel-btn" onclick="closeActivationModal()">
+            <i class="fas fa-times"></i> إلغاء
+        </button>
+    </div>
+</div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
     import { getDatabase, ref, onValue, push, set, remove, get } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
@@ -677,6 +782,7 @@
     let editingPositionId = null;
     let existingRealUrl = '';
     let existingXrayUrl = '';
+    let pendingActivationUserId = null;
 
     const adminLoginScreen = document.getElementById('adminLoginScreen');
     const mainContent = document.getElementById('mainContent');
@@ -685,6 +791,7 @@
     const adminLoginBtn = document.getElementById('adminLoginBtn');
     const adminLoginError = document.getElementById('adminLoginError');
     const logoutBtn = document.getElementById('logoutBtn');
+    const activationModal = document.getElementById('activationModal');
 
     // ==================== دالة موحدة لتحويل روابط الصور ====================
     function getCloudflareImageUrl(imageValue) {
@@ -1235,8 +1342,8 @@
                             <button class="btn btn-primary btn-sm" onclick="openEditUser('${key}')">
                                 <i class="fas fa-edit"></i> تعديل
                             </button>
-                            <button class="btn btn-success btn-sm" onclick="activateSubscription('${key}')">
-                                <i class="fas fa-check"></i> تفعيل سنة
+                            <button class="btn btn-success btn-sm" onclick="showActivationOptions('${key}')">
+                                <i class="fas fa-check"></i> تفعيل
                             </button>
                             <button class="btn btn-warning btn-sm" onclick="cancelSubscription('${key}')">
                                 <i class="fas fa-ban"></i> إلغاء
@@ -1261,6 +1368,55 @@
     document.getElementById('userSearchInput').addEventListener('input', function(e) {
         loadUsers(e.target.value.trim());
     });
+
+    // فتح نافذة خيارات التفعيل
+    window.showActivationOptions = function(userId) {
+        pendingActivationUserId = userId;
+        activationModal.classList.add('show');
+    };
+
+    // إغلاق نافذة خيارات التفعيل
+    window.closeActivationModal = function() {
+        activationModal.classList.remove('show');
+        pendingActivationUserId = null;
+    };
+
+    // تأكيد التفعيل حسب المدة المختارة
+    window.confirmActivation = async function(duration) {
+        if (!pendingActivationUserId) return;
+        
+        const userId = pendingActivationUserId;
+        const durationText = duration === '3months' ? '3 أشهر' : 'سنة';
+        
+        closeActivationModal();
+        
+        if (confirm(`تأكيد تفعيل الاشتراك لمدة ${durationText}؟`)) {
+            try {
+                const startDate = new Date();
+                const endDate = new Date();
+                
+                if (duration === '3months') {
+                    endDate.setMonth(endDate.getMonth() + 3);
+                } else {
+                    endDate.setFullYear(endDate.getFullYear() + 1);
+                }
+                
+                await set(ref(db, `users/${userId}/subscription`), {
+                    status: 'approved',
+                    startDate: startDate.toISOString(),
+                    endDate: endDate.toISOString(),
+                    price: '10,000 دينار عراقي',
+                    duration: duration === '3months' ? '3months' : '1year',
+                    activatedAt: new Date().toISOString()
+                });
+                alert(`✅ تم تفعيل الاشتراك لمدة ${durationText}`);
+                loadUsers();
+            } catch (error) {
+                console.error('Activate subscription error:', error);
+                alert('❌ خطأ: ' + error.message);
+            }
+        }
+    };
 
     // فتح نافذة التعديل
     window.openEditUser = function(userId) {
@@ -1349,29 +1505,6 @@
         }
     };
 
-    window.activateSubscription = async function(userId) {
-        if (confirm('تفعيل الاشتراك لمدة سنة كاملة؟')) {
-            try {
-                const startDate = new Date();
-                const endDate = new Date();
-                endDate.setFullYear(endDate.getFullYear() + 1);
-                
-                await set(ref(db, `users/${userId}/subscription`), {
-                    status: 'approved',
-                    startDate: startDate.toISOString(),
-                    endDate: endDate.toISOString(),
-                    price: '10,000 دينار عراقي',
-                    activatedAt: new Date().toISOString()
-                });
-                alert('✅ تم تفعيل الاشتراك لمدة سنة');
-                loadUsers();
-            } catch (error) {
-                console.error('Activate subscription error:', error);
-                alert('❌ خطأ: ' + error.message);
-            }
-        }
-    };
-
     window.cancelSubscription = async function(userId) {
         if (confirm('إلغاء اشتراك هذا المستخدم؟')) {
             try {
@@ -1400,6 +1533,13 @@
             }
         }
     };
+
+    // إغلاق نافذة خيارات التفعيل عند النقر خارجها
+    activationModal.addEventListener('click', function(e) {
+        if (e.target === activationModal) {
+            closeActivationModal();
+        }
+    });
 
     // مراقبة حالة المستخدم
     onAuthStateChanged(auth, (user) => {
